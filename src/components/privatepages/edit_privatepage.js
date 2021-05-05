@@ -1,22 +1,27 @@
 import axios from "axios";
 import React from "react";
 import Sidebar from "../../components/Sidebar";
-import Loader from "react-loader-spinner";
 import SimpleReactValidator from "simple-react-validator";
-class EditMenu extends React.Component {
+import PropTypes from "prop-types";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
+import Loader from "react-loader-spinner";
+class EditPrivatePage extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      menu: "",
+      title: "",
       description: "",
-      date: Date.now(),
+      theme: "snow",
       mobile_message: "",
       validError: false,
       loading: false,
     };
     this.handleChange = this.handleChange.bind(this);
-
     this.handleSubmit = this.handleSubmit.bind(this);
+
+    this.onChange = this.onChange.bind(this);
+
     this.validator = new SimpleReactValidator({
       className: "text-danger",
       validators: {
@@ -107,47 +112,54 @@ class EditMenu extends React.Component {
     const { _id } = this.props.match.params;
     console.log(_id);
     axios
-      .get(`https://deepthoughts-nodejs.herokuapp.com/admin/update_menu/${_id}`)
+      .get(
+        `https://deepthoughts-nodejs.herokuapp.com/private/update_privatepage/${_id}`
+      )
       .then((res) => {
         console.log(res.data);
-        const menu = {
-          menu: res.data.menu,
+        const private1 = {
+          title: res.data.title,
           description: res.data.description,
-          date: res.data.date,
         };
-        console.log(menu.menu);
+        console.log(private1.title);
         this.setState({
-          menu: menu.menu,
-          description: menu.description,
-          date: menu.date,
+          title: private1.title,
+          description: private1.description,
           loading: true,
         });
       });
   }
 
-  handleChange(event) {
+  handleChange(html) {
+    this.setState({ description: html });
+  }
+  onChange(event) {
     this.setState({
       [event.target.name]: event.target.value,
     });
+  }
+
+  handleThemeChange(newTheme) {
+    if (newTheme === "core") newTheme = null;
+    this.setState({ theme: newTheme });
   }
 
   handleSubmit(e) {
     const { _id } = this.props.match.params;
     e.preventDefault();
     if (this.validator.allValid()) {
-      const menu = {
-        menu: this.state.menu,
+      const post = {
+        title: this.state.title,
         description: this.state.description,
-        date: this.state.date,
       };
       axios
         .put(
-          `https://deepthoughts-nodejs.herokuapp.com/admin/update_menu_patch/${_id}`,
-          menu
+          `https://deepthoughts-nodejs.herokuapp.com/private/update_privatepage_patch/${_id}`,
+          post
         )
         .then((res) => console.log(res.data));
-      this.forceUpdate();
-      this.props.history.push("/menu");
+
+      this.props.history.push("/privatepage");
     } else {
       this.validator.showMessages();
       this.forceUpdate();
@@ -160,11 +172,11 @@ class EditMenu extends React.Component {
         <Sidebar></Sidebar>
         <div className="admin-wrapper col-12">
           <div className="admin-content">
-            <div className="admin-head">Edit Menu</div>
+            <div className="admin-head">Edit Private Page</div>
             {this.state.loading ? (
               <div className="admin-data">
                 <div className="col-lg-12 p-0 text-right mb-30">
-                  <a href="/menu">
+                  <a href="/privatepage">
                     <button className="button button-contactForm boxed-btn">
                       Back
                     </button>
@@ -179,50 +191,65 @@ class EditMenu extends React.Component {
                       <div className="col-lg-12 p-0"></div>
                       <div className="col-lg-12 p-0">
                         <div className="form-group tags-field row m-0">
-                          <label className="col-lg-2 p-0"> Menu Name</label>
+                          <label className="col-lg-2 p-0">Title</label>
                           <input
                             className="form-control col-lg-10"
-                            name="menu"
-                            onChange={this.handleChange}
-                            value={this.state.menu}
+                            name="title"
+                            onChange={this.onChange}
+                            value={this.state.title}
                             type="text"
                             onfocus="this.placeholder = 'Menu Name'"
                             onblur="this.placeholder = ''"
                             placeholder=""
                           />
                           {this.validator.message(
-                            " Menu Name",
-                            this.state.menu,
-                            "required|whitespace|min:1|max:20"
+                            "Title",
+                            this.state.title,
+                            "required|whitespace|min:1|max:300"
                           )}
                           {this.state.mobile_message}
                         </div>
+
                         <div className="form-group tags-field row m-0">
                           <label className="col-lg-2 p-0">Description</label>
-                          <textarea
-                            className="form-control col-lg-10"
-                            name="description"
+                          {/* <textarea
+                          className="form-control col-lg-10"
+                          name="description"
+                          onChange={this.onChange}
+                          value={this.state.description}
+                          type="text"
+                          onfocus="this.placeholder = 'Menu Name'"
+                          onblur="this.placeholder = ''"
+                          placeholder=""
+                        /> */}
+                          <ReactQuill
+                            className=" col-lg-10 height"
+                            theme={this.state.theme}
                             onChange={this.handleChange}
                             value={this.state.description}
-                            type="text"
-                            onfocus="this.placeholder = 'Menu Name'"
-                            onblur="this.placeholder = ''"
-                            placeholder=""
+                            modules={EditPrivatePage.modules}
+                            formats={EditPrivatePage.formats}
+                            bounds={".app"}
+                            placeholder={this.props.placeholder}
                           />
+
                           {this.validator.message(
                             "Description",
                             this.state.description,
-                            "required|whitespace|min:40|max:200"
+                            "required"
                           )}
                         </div>
                       </div>
+
+                      <br />
+                      <hr />
 
                       <div className="col-lg-12 p-0">
                         <div className="form-group tags-field  row m-0">
                           <label className="col-lg-2 p-0" />
                           <div className="col-lg-6 p-0">
                             <button
-                              className="button button-contactForm boxed-btn"
+                              className="button button-contactForm boxed-btn margin"
                               type="submit"
                             >
                               Save
@@ -252,5 +279,43 @@ class EditMenu extends React.Component {
     );
   }
 }
+EditPrivatePage.modules = {
+  toolbar: [
+    [{ header: "1" }, { header: "2" }, { font: [] }],
+    [{ size: [] }],
+    ["bold", "italic", "underline", "strike", "blockquote"],
+    [
+      { list: "ordered" },
+      { list: "bullet" },
+      { indent: "-1" },
+      { indent: "+1" },
+    ],
+    ["link", "image", "video"],
+    ["clean"],
+  ],
+  clipboard: {
+    matchVisual: false,
+  },
+};
 
-export default EditMenu;
+EditPrivatePage.formats = [
+  "header",
+  "font",
+  "size",
+  "bold",
+  "italic",
+  "underline",
+  "strike",
+  "blockquote",
+  "list",
+  "bullet",
+  "indent",
+  "link",
+  "image",
+  "video",
+];
+
+EditPrivatePage.propTypes = {
+  placeholder: PropTypes.string,
+};
+export default EditPrivatePage;

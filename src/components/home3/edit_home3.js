@@ -1,20 +1,24 @@
 import axios from "axios";
 import React from "react";
-import Sidebar from "../../components/Sidebar";
-import Loader from "react-loader-spinner";
+import Sidebar from "../Sidebar";
 import SimpleReactValidator from "simple-react-validator";
-class EditMenu extends React.Component {
+import Loader from "react-loader-spinner";
+class EditHome3 extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      menu: "",
+      title: "",
+      subtitle: "",
       description: "",
-      date: Date.now(),
+      image: "",
+      loading: false,
+
       mobile_message: "",
       validError: false,
-      loading: false,
     };
     this.handleChange = this.handleChange.bind(this);
+
+    this.onFileChange = this.onFileChange.bind(this);
 
     this.handleSubmit = this.handleSubmit.bind(this);
     this.validator = new SimpleReactValidator({
@@ -107,47 +111,86 @@ class EditMenu extends React.Component {
     const { _id } = this.props.match.params;
     console.log(_id);
     axios
-      .get(`https://deepthoughts-nodejs.herokuapp.com/admin/update_menu/${_id}`)
+      .get(`https://deepthoughts-nodejs.herokuapp.com/home/update_home3/${_id}`)
       .then((res) => {
         console.log(res.data);
-        const menu = {
-          menu: res.data.menu,
+        const home3 = {
+          title: res.data.title,
+          subtitle: res.data.subtitle,
           description: res.data.description,
-          date: res.data.date,
+          image: res.data.image,
         };
-        console.log(menu.menu);
+        console.log(home3.title);
         this.setState({
-          menu: menu.menu,
-          description: menu.description,
-          date: menu.date,
+          title: home3.title,
+          subtitle: home3.subtitle,
+          description: home3.description,
+
+          image: home3.image,
           loading: true,
         });
       });
   }
 
+  onFileChange(e) {
+    this.setState({ image: e.target.files[0] });
+  }
   handleChange(event) {
     this.setState({
       [event.target.name]: event.target.value,
     });
   }
+  //   handleSubmit(e) {
+  //     e.preventDefault();
 
+  //     const formdata = new FormData();
+  //     formdata.append("title", this.state.title);
+  //     formdata.append("subtitle", this.state.subtitle);
+  //     formdata.append("description", this.state.description);
+  //     formdata.append("file", this.state.image);
+
+  //     axios
+  //       .post(
+  //         "https://deepthoughts-nodejs.herokuapp.com/home/AddHome3",
+
+  //         formdata
+  //       )
+  //       .then(function (response) {
+  //         // handle success
+
+  //         console.log(response.data);
+
+  //         this.setState({ formdata });
+  //       })
+  //       .catch(function (error) {
+  //         // handle error
+  //         console.log(error);
+  //       });
+  //     this.props.history.push("/post");
+  //   }
   handleSubmit(e) {
     const { _id } = this.props.match.params;
     e.preventDefault();
     if (this.validator.allValid()) {
-      const menu = {
-        menu: this.state.menu,
-        description: this.state.description,
-        date: this.state.date,
-      };
+      const formdata = new FormData();
+      formdata.append("title", this.state.title);
+      formdata.append("subtitle", this.state.subtitle);
+      formdata.append("description", this.state.description);
+      formdata.append("file", this.state.image);
+      //   const post = {
+      //     title: this.state.title,
+      //     subtitle: home3.subtitle,
+      //     description: this.state.description,
+      //     image: this.state.image,
+      //   };
       axios
         .put(
-          `https://deepthoughts-nodejs.herokuapp.com/admin/update_menu_patch/${_id}`,
-          menu
+          `https://deepthoughts-nodejs.herokuapp.com/home/update_home3_patch/${_id}`,
+          formdata
         )
         .then((res) => console.log(res.data));
-      this.forceUpdate();
-      this.props.history.push("/menu");
+
+      this.props.history.push("/home_section_3");
     } else {
       this.validator.showMessages();
       this.forceUpdate();
@@ -160,11 +203,11 @@ class EditMenu extends React.Component {
         <Sidebar></Sidebar>
         <div className="admin-wrapper col-12">
           <div className="admin-content">
-            <div className="admin-head">Edit Menu</div>
+            <div className="admin-head">Edit Home Section 3</div>
             {this.state.loading ? (
               <div className="admin-data">
                 <div className="col-lg-12 p-0 text-right mb-30">
-                  <a href="/menu">
+                  <a href="/home_section_3">
                     <button className="button button-contactForm boxed-btn">
                       Back
                     </button>
@@ -179,24 +222,42 @@ class EditMenu extends React.Component {
                       <div className="col-lg-12 p-0"></div>
                       <div className="col-lg-12 p-0">
                         <div className="form-group tags-field row m-0">
-                          <label className="col-lg-2 p-0"> Menu Name</label>
+                          <label className="col-lg-2 p-0">Title</label>
                           <input
                             className="form-control col-lg-10"
-                            name="menu"
+                            name="title"
                             onChange={this.handleChange}
-                            value={this.state.menu}
+                            value={this.state.title}
                             type="text"
                             onfocus="this.placeholder = 'Menu Name'"
                             onblur="this.placeholder = ''"
                             placeholder=""
                           />
                           {this.validator.message(
-                            " Menu Name",
-                            this.state.menu,
-                            "required|whitespace|min:1|max:20"
+                            "Title",
+                            this.state.title,
+                            "required|whitespace|min:1|max:40"
                           )}
-                          {this.state.mobile_message}
                         </div>
+                        <div className="form-group tags-field row m-0">
+                          <label className="col-lg-2 p-0">Sub Title</label>
+                          <input
+                            className="form-control col-lg-10"
+                            name="subtitle"
+                            onChange={this.handleChange}
+                            value={this.state.subtitle}
+                            type="text"
+                            onfocus="this.placeholder = 'Menu Name'"
+                            onblur="this.placeholder = ''"
+                            placeholder=""
+                          />
+                          {this.validator.message(
+                            "Sub Title",
+                            this.state.subtitle,
+                            "required|whitespace|min:1|max:100"
+                          )}
+                        </div>
+
                         <div className="form-group tags-field row m-0">
                           <label className="col-lg-2 p-0">Description</label>
                           <textarea
@@ -212,7 +273,22 @@ class EditMenu extends React.Component {
                           {this.validator.message(
                             "Description",
                             this.state.description,
-                            "required|whitespace|min:40|max:200"
+                            "required|whitespace|min:40|max:400"
+                          )}
+                        </div>
+                        <div className="form-group tags-field row m-0">
+                          <label className="col-lg-2 p-0">Upload Image</label>
+                          <input
+                            type="file"
+                            onChange={this.onFileChange}
+                            name="file"
+                            className="form-control col-lg-10"
+                          />
+
+                          {this.validator.message(
+                            "Image",
+                            this.state.image,
+                            "required"
                           )}
                         </div>
                       </div>
@@ -253,4 +329,4 @@ class EditMenu extends React.Component {
   }
 }
 
-export default EditMenu;
+export default EditHome3;

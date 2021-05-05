@@ -1,21 +1,21 @@
 import axios from "axios";
 import React from "react";
-import Sidebar from "../../components/Sidebar";
+import Sidebar from "../Sidebar";
+
 import SimpleReactValidator from "simple-react-validator";
-import Loader from "react-loader-spinner";
-class ViewMenu extends React.Component {
+class Blog extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       menu: "",
+      description: "",
       date: Date.now(),
       mobile_message: "",
       validError: false,
-      loading: false,
     };
     this.handleChange = this.handleChange.bind(this);
+
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.menuNameChange = this.menuNameChange.bind(this);
     this.validator = new SimpleReactValidator({
       className: "text-danger",
       validators: {
@@ -103,23 +103,18 @@ class ViewMenu extends React.Component {
     });
   }
   componentDidMount() {
-    const { _id } = this.props.match.params;
-    console.log(_id);
     axios
-      .get(`https://deepthoughts-nodejs.herokuapp.com/admin/update_menu/${_id}`)
+      .get(
+        `https://deepthoughts-nodejs.herokuapp.com/blog/update_blog/608a5f3bb23d99001525b0ce`
+      )
       .then((res) => {
         console.log(res.data);
-        const menu = {
-          menu: res.data.menu,
-          description: res.data.description,
-          date: res.data.date,
+        const blog = {
+          url: res.data.url,
         };
-        console.log(menu.menu);
+        console.log(blog.url);
         this.setState({
-          menu: menu.menu,
-          description: menu.description,
-          date: menu.date,
-          loading: true,
+          url: blog.url,
         });
       });
   }
@@ -131,43 +126,23 @@ class ViewMenu extends React.Component {
   }
 
   handleSubmit(e) {
-    const { _id } = this.props.match.params;
     e.preventDefault();
     if (this.validator.allValid()) {
       const menu = {
-        menu: this.state.menu,
-        date: Date.now(),
+        url: this.state.url,
       };
       axios
         .put(
-          `https://deepthoughts-nodejs.herokuapp.com/admin/update_menu_patch/${_id}`,
+          `https://deepthoughts-nodejs.herokuapp.com/blog/update_blog_patch/608a5f3bb23d99001525b0ce`,
           menu
         )
         .then((res) => console.log(res.data));
-
-      this.props.history.push("/menu");
+      this.forceUpdate();
+      this.props.history.push("/blog");
+      this.setState({ mobile_message: "Blog Updated Sucessfully" });
     } else {
       this.validator.showMessages();
       this.forceUpdate();
-    }
-  }
-  menuNameChange(e) {
-    this.setState({
-      menu: e.target.value,
-    });
-    if (this.state.validError != true) {
-      axios
-        .get(`https://deepthoughts-nodejs.herokuapp.com/admin/menus`)
-        .then((res) => {
-          if (this.state.menu > 1) {
-            this.setState({
-              mobile_message: "Menu already exist",
-              validError: false,
-            });
-          } else {
-            this.setState({ mobile_message: "", validError: true });
-          }
-        });
     }
   }
 
@@ -177,53 +152,64 @@ class ViewMenu extends React.Component {
         <Sidebar></Sidebar>
         <div className="admin-wrapper col-12">
           <div className="admin-content">
-            <div className="admin-head">Menu - View</div>
-            {this.state.loading ? (
-              <div className="admin-data">
+            <div className="admin-head">Edit Menu</div>
+            <div className="admin-data">
+              {this.state.mobile_message == "" ? (
+                <></>
+              ) : (
                 <div className="col-lg-12 p-0 text-right mb-30">
-                  <a href="/menu">
+                  <a href="#">
                     <button className="button button-contactForm boxed-btn">
-                      Back
+                      {this.state.mobile_message}
                     </button>
                   </a>
                 </div>
-                <div className="table-responsive admin-table demo">
-                  <table>
-                    <tbody>
-                      <tr>
-                        <td valign="top" width="150px;">
-                          <b>Menu Name</b>
-                        </td>
-                        <td>{this.state.menu}</td>
-                      </tr>
-                      <tr>
-                        <td valign="top">
-                          <b>Updated Date</b>
-                        </td>
-                        <td>{this.state.date}</td>
-                      </tr>
-                      <tr>
-                        <td valign="top" width="150px;">
-                          <b>Description</b>
-                        </td>
-                        <td>{this.state.description}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+              )}
+              <div className="container-fluid p-0">
+                <form
+                  className="form-contact contact_form"
+                  onSubmit={this.handleSubmit}
+                >
+                  <div className="row m-0">
+                    <div className="col-lg-12 p-0"></div>
+                    <div className="col-lg-12 p-0">
+                      <div className="form-group tags-field row m-0">
+                        <label className="col-lg-2 p-0">Url</label>
+                        <input
+                          className="form-control col-lg-10"
+                          name="url"
+                          onChange={this.handleChange}
+                          value={this.state.url}
+                          type="text"
+                          onfocus="this.placeholder = 'Menu Name'"
+                          onblur="this.placeholder = ''"
+                          placeholder="Alt Text"
+                        />
+                        {this.validator.message(
+                          "URL",
+                          this.state.url,
+                          "required|url"
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="col-lg-12 p-0">
+                      <div className="form-group tags-field  row m-0">
+                        <label className="col-lg-2 p-0" />
+                        <div className="col-lg-6 p-0">
+                          <button
+                            className="button button-contactForm boxed-btn"
+                            type="submit"
+                          >
+                            Save
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </form>
               </div>
-            ) : (
-              <div style={{ marginLeft: "500px", marginTop: "200px" }}>
-                {" "}
-                <Loader
-                  type="Circles"
-                  color="#0029ff"
-                  height={100}
-                  width={100}
-                  timeout={3000} //3 secs
-                />
-              </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
@@ -231,4 +217,4 @@ class ViewMenu extends React.Component {
   }
 }
 
-export default ViewMenu;
+export default Blog;

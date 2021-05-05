@@ -1,20 +1,25 @@
 import axios from "axios";
 import React from "react";
 import Sidebar from "../../components/Sidebar";
-import Loader from "react-loader-spinner";
 import SimpleReactValidator from "simple-react-validator";
-class EditMenu extends React.Component {
+import Loader from "react-loader-spinner";
+class EditAbout3 extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      menu: "",
-      description: "",
-      date: Date.now(),
+      name: "",
+      designation: "",
+      image: "",
+      twitter: "",
+      facebook: "",
+      google: "",
       mobile_message: "",
       validError: false,
       loading: false,
     };
     this.handleChange = this.handleChange.bind(this);
+
+    this.onFileChange = this.onFileChange.bind(this);
 
     this.handleSubmit = this.handleSubmit.bind(this);
     this.validator = new SimpleReactValidator({
@@ -107,24 +112,35 @@ class EditMenu extends React.Component {
     const { _id } = this.props.match.params;
     console.log(_id);
     axios
-      .get(`https://deepthoughts-nodejs.herokuapp.com/admin/update_menu/${_id}`)
+      .get(
+        `https://deepthoughts-nodejs.herokuapp.com/about/update_about3/${_id}`
+      )
       .then((res) => {
         console.log(res.data);
-        const menu = {
-          menu: res.data.menu,
-          description: res.data.description,
-          date: res.data.date,
+        const about3 = {
+          name: res.data.name,
+          designation: res.data.designation,
+          image: res.data.image,
+          twitter: res.data.twitter,
+          facebook: res.data.facebook,
+          google: res.data.google,
         };
-        console.log(menu.menu);
+        console.log(about3.title);
         this.setState({
-          menu: menu.menu,
-          description: menu.description,
-          date: menu.date,
+          name: about3.name,
+          designation: about3.designation,
+          image: about3.image,
+          twitter: about3.twitter,
+          facebook: about3.facebook,
+          google: about3.google,
           loading: true,
         });
       });
   }
 
+  onFileChange(e) {
+    this.setState({ image: e.target.files[0] });
+  }
   handleChange(event) {
     this.setState({
       [event.target.name]: event.target.value,
@@ -135,19 +151,22 @@ class EditMenu extends React.Component {
     const { _id } = this.props.match.params;
     e.preventDefault();
     if (this.validator.allValid()) {
-      const menu = {
-        menu: this.state.menu,
-        description: this.state.description,
-        date: this.state.date,
-      };
+      const formdata = new FormData();
+      formdata.append("name", this.state.name);
+      formdata.append("designation", this.state.designation);
+      formdata.append("file", this.state.image);
+      formdata.append("twitter", this.state.twitter);
+      formdata.append("facebook", this.state.facebook);
+      formdata.append("google", this.state.google);
+
       axios
         .put(
-          `https://deepthoughts-nodejs.herokuapp.com/admin/update_menu_patch/${_id}`,
-          menu
+          `https://deepthoughts-nodejs.herokuapp.com/about/update_about3_patch/${_id}`,
+          formdata
         )
         .then((res) => console.log(res.data));
-      this.forceUpdate();
-      this.props.history.push("/menu");
+
+      this.props.history.push("/about_section_3");
     } else {
       this.validator.showMessages();
       this.forceUpdate();
@@ -160,11 +179,11 @@ class EditMenu extends React.Component {
         <Sidebar></Sidebar>
         <div className="admin-wrapper col-12">
           <div className="admin-content">
-            <div className="admin-head">Edit Menu</div>
+            <div className="admin-head">Edit Leadership Team</div>
             {this.state.loading ? (
               <div className="admin-data">
                 <div className="col-lg-12 p-0 text-right mb-30">
-                  <a href="/menu">
+                  <a href="/about_section_3">
                     <button className="button button-contactForm boxed-btn">
                       Back
                     </button>
@@ -179,40 +198,109 @@ class EditMenu extends React.Component {
                       <div className="col-lg-12 p-0"></div>
                       <div className="col-lg-12 p-0">
                         <div className="form-group tags-field row m-0">
-                          <label className="col-lg-2 p-0"> Menu Name</label>
+                          <label className="col-lg-2 p-0">Name</label>
                           <input
                             className="form-control col-lg-10"
-                            name="menu"
+                            name="name"
                             onChange={this.handleChange}
-                            value={this.state.menu}
+                            value={this.state.name}
                             type="text"
                             onfocus="this.placeholder = 'Menu Name'"
                             onblur="this.placeholder = ''"
                             placeholder=""
                           />
                           {this.validator.message(
-                            " Menu Name",
-                            this.state.menu,
+                            "Name",
+                            this.state.name,
                             "required|whitespace|min:1|max:20"
                           )}
-                          {this.state.mobile_message}
                         </div>
                         <div className="form-group tags-field row m-0">
-                          <label className="col-lg-2 p-0">Description</label>
-                          <textarea
+                          <label className="col-lg-2 p-0">Designation</label>
+                          <input
                             className="form-control col-lg-10"
-                            name="description"
+                            name="designation"
                             onChange={this.handleChange}
-                            value={this.state.description}
+                            value={this.state.designation}
                             type="text"
                             onfocus="this.placeholder = 'Menu Name'"
                             onblur="this.placeholder = ''"
                             placeholder=""
                           />
                           {this.validator.message(
-                            "Description",
-                            this.state.description,
-                            "required|whitespace|min:40|max:200"
+                            "Designation",
+                            this.state.designation,
+                            "required|whitespace|min:1|max:40"
+                          )}
+                        </div>
+
+                        <div className="form-group tags-field row m-0">
+                          <label className="col-lg-2 p-0">Upload Image</label>
+                          <input
+                            type="file"
+                            onChange={this.onFileChange}
+                            name="file"
+                            className="form-control col-lg-10"
+                          />
+
+                          {this.validator.message(
+                            "Image",
+                            this.state.image,
+                            "required"
+                          )}
+                        </div>
+                        <div className="form-group tags-field row m-0">
+                          <label className="col-lg-2 p-0">Twitter Link</label>
+                          <input
+                            className="form-control col-lg-10"
+                            name="twitter"
+                            onChange={this.handleChange}
+                            value={this.state.twitter}
+                            type="text"
+                            onfocus="this.placeholder = 'Menu Name'"
+                            onblur="this.placeholder = ''"
+                            placeholder=""
+                          />
+                          {this.validator.message(
+                            "Twitter Link",
+                            this.state.twitter,
+                            "url"
+                          )}
+                        </div>
+                        <div className="form-group tags-field row m-0">
+                          <label className="col-lg-2 p-0">Facebook Link</label>
+                          <input
+                            className="form-control col-lg-10"
+                            name="facebook"
+                            onChange={this.handleChange}
+                            value={this.state.facebook}
+                            type="text"
+                            onfocus="this.placeholder = 'Menu Name'"
+                            onblur="this.placeholder = ''"
+                            placeholder=""
+                          />
+                          {this.validator.message(
+                            "Facebook Link",
+                            this.state.facebook,
+                            "url"
+                          )}
+                        </div>
+                        <div className="form-group tags-field row m-0">
+                          <label className="col-lg-2 p-0">Google Link</label>
+                          <input
+                            className="form-control col-lg-10"
+                            name="google"
+                            onChange={this.handleChange}
+                            value={this.state.google}
+                            type="text"
+                            onfocus="this.placeholder = 'Menu Name'"
+                            onblur="this.placeholder = ''"
+                            placeholder=""
+                          />
+                          {this.validator.message(
+                            "Google Link",
+                            this.state.google,
+                            "url"
                           )}
                         </div>
                       </div>
@@ -253,4 +341,4 @@ class EditMenu extends React.Component {
   }
 }
 
-export default EditMenu;
+export default EditAbout3;

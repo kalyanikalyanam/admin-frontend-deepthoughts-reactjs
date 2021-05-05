@@ -2,20 +2,20 @@ import axios from "axios";
 import React from "react";
 import Sidebar from "../../components/Sidebar";
 import SimpleReactValidator from "simple-react-validator";
-import Loader from "react-loader-spinner";
-class ViewMenu extends React.Component {
+class AddHome1_1 extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      menu: "",
-      date: Date.now(),
+      video: "",
+
       mobile_message: "",
       validError: false,
-      loading: false,
     };
     this.handleChange = this.handleChange.bind(this);
+
+    this.onFileChange = this.onFileChange.bind(this);
+
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.menuNameChange = this.menuNameChange.bind(this);
     this.validator = new SimpleReactValidator({
       className: "text-danger",
       validators: {
@@ -102,72 +102,42 @@ class ViewMenu extends React.Component {
       },
     });
   }
-  componentDidMount() {
-    const { _id } = this.props.match.params;
-    console.log(_id);
-    axios
-      .get(`https://deepthoughts-nodejs.herokuapp.com/admin/update_menu/${_id}`)
-      .then((res) => {
-        console.log(res.data);
-        const menu = {
-          menu: res.data.menu,
-          description: res.data.description,
-          date: res.data.date,
-        };
-        console.log(menu.menu);
-        this.setState({
-          menu: menu.menu,
-          description: menu.description,
-          date: menu.date,
-          loading: true,
-        });
-      });
+  onFileChange(e) {
+    this.setState({ video: e.target.files[0] });
   }
-
   handleChange(event) {
     this.setState({
       [event.target.name]: event.target.value,
     });
   }
-
   handleSubmit(e) {
-    const { _id } = this.props.match.params;
     e.preventDefault();
     if (this.validator.allValid()) {
-      const menu = {
-        menu: this.state.menu,
-        date: Date.now(),
-      };
-      axios
-        .put(
-          `https://deepthoughts-nodejs.herokuapp.com/admin/update_menu_patch/${_id}`,
-          menu
-        )
-        .then((res) => console.log(res.data));
+      const formdata = new FormData();
 
-      this.props.history.push("/menu");
+      formdata.append("file", this.state.video);
+
+      axios
+        .post(
+          "https://deepthoughts-nodejs.herokuapp.com/home/AddHome1_1",
+
+          formdata
+        )
+        .then(function (response) {
+          // handle success
+
+          console.log(response.data);
+
+          this.setState({ formdata });
+        })
+        .catch(function (error) {
+          // handle error
+          console.log(error);
+        });
+      this.props.history.push("/home_section_1_1");
     } else {
       this.validator.showMessages();
       this.forceUpdate();
-    }
-  }
-  menuNameChange(e) {
-    this.setState({
-      menu: e.target.value,
-    });
-    if (this.state.validError != true) {
-      axios
-        .get(`https://deepthoughts-nodejs.herokuapp.com/admin/menus`)
-        .then((res) => {
-          if (this.state.menu > 1) {
-            this.setState({
-              mobile_message: "Menu already exist",
-              validError: false,
-            });
-          } else {
-            this.setState({ mobile_message: "", validError: true });
-          }
-        });
     }
   }
 
@@ -177,53 +147,50 @@ class ViewMenu extends React.Component {
         <Sidebar></Sidebar>
         <div className="admin-wrapper col-12">
           <div className="admin-content">
-            <div className="admin-head">Menu - View</div>
-            {this.state.loading ? (
-              <div className="admin-data">
-                <div className="col-lg-12 p-0 text-right mb-30">
-                  <a href="/menu">
-                    <button className="button button-contactForm boxed-btn">
-                      Back
-                    </button>
-                  </a>
-                </div>
-                <div className="table-responsive admin-table demo">
-                  <table>
-                    <tbody>
-                      <tr>
-                        <td valign="top" width="150px;">
-                          <b>Menu Name</b>
-                        </td>
-                        <td>{this.state.menu}</td>
-                      </tr>
-                      <tr>
-                        <td valign="top">
-                          <b>Updated Date</b>
-                        </td>
-                        <td>{this.state.date}</td>
-                      </tr>
-                      <tr>
-                        <td valign="top" width="150px;">
-                          <b>Description</b>
-                        </td>
-                        <td>{this.state.description}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+            <div className="admin-head">Home Section 1 video - Add New</div>
+            <div className="admin-data">
+              <div className="container-fluid p-0">
+                <form
+                  className="form-contact contact_form"
+                  onSubmit={this.handleSubmit}
+                >
+                  <div className="row m-0">
+                    <div className="col-lg-12 p-0"></div>
+                    <div className="col-lg-12 p-0">
+                      <div className="form-group tags-field row m-0">
+                        <label className="col-lg-2 p-0">Upload video</label>
+                        <input
+                          type="file"
+                          onChange={this.onFileChange}
+                          name="file"
+                          className="form-control col-lg-10"
+                        />
+
+                        {this.validator.message(
+                          "video",
+                          this.state.video,
+                          "required"
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="col-lg-12 p-0">
+                      <div className="form-group tags-field  row m-0">
+                        <label className="col-lg-2 p-0" />
+                        <div className="col-lg-6 p-0">
+                          <button
+                            className="button button-contactForm boxed-btn"
+                            type="submit"
+                          >
+                            Save
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </form>
               </div>
-            ) : (
-              <div style={{ marginLeft: "500px", marginTop: "200px" }}>
-                {" "}
-                <Loader
-                  type="Circles"
-                  color="#0029ff"
-                  height={100}
-                  width={100}
-                  timeout={3000} //3 secs
-                />
-              </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
@@ -231,4 +198,4 @@ class ViewMenu extends React.Component {
   }
 }
 
-export default ViewMenu;
+export default AddHome1_1;

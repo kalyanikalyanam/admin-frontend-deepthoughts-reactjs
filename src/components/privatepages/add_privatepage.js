@@ -1,19 +1,23 @@
 import axios from "axios";
 import React from "react";
 import Sidebar from "../../components/Sidebar";
+import PropTypes from "prop-types";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 import SimpleReactValidator from "simple-react-validator";
-class AddMenu extends React.Component {
+class AddPrivatePage extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      menu: "",
+      title: "",
       description: "",
-      data: Date.now(),
+
+      theme: "snow",
       mobile_message: "",
       validError: false,
     };
     this.handleChange = this.handleChange.bind(this);
-    this.menuNameChange = this.menuNameChange.bind(this);
+    this.onChange = this.onChange.bind(this);
 
     this.handleSubmit = this.handleSubmit.bind(this);
     this.validator = new SimpleReactValidator({
@@ -103,60 +107,52 @@ class AddMenu extends React.Component {
     });
   }
 
-  handleChange(event) {
+  handleChange(html) {
+    this.setState({ description: html });
+  }
+  onChange(event) {
     this.setState({
       [event.target.name]: event.target.value,
     });
   }
 
+  handleThemeChange(newTheme) {
+    if (newTheme === "core") newTheme = null;
+    this.setState({ theme: newTheme });
+  }
   handleSubmit(event) {
     event.preventDefault();
     if (this.validator.allValid()) {
-      const menu = {
-        menu: this.state.menu,
+      const private1 = {
+        title: this.state.title,
         description: this.state.description,
-        date: Date.now(),
       };
-      console.log(menu);
+
+      console.log(private1);
       axios
-        .post(`https://deepthoughts-nodejs.herokuapp.com/admin/add_menu`, menu)
+        .post(
+          `https://deepthoughts-nodejs.herokuapp.com/private/Addprivatepage`,
+          private1
+        )
         .then((res) => {
           console.log(res);
           console.log(res.data);
         });
 
-      this.props.history.push("/menu");
+      this.props.history.push("/privatepage");
     } else {
       this.validator.showMessages();
       this.forceUpdate();
     }
   }
-  menuNameChange(e) {
-    this.setState({
-      menu: e.target.value,
-    });
-    if (this.state.validError != true) {
-      axios
-        .get(`https://deepthoughts-nodejs.herokuapp.com/admin/menus`)
-        .then((res) => {
-          if (this.state.menu > 0) {
-            this.setState({
-              mobile_message: "Menu already exist",
-              validError: false,
-            });
-          } else {
-            this.setState({ mobile_message: "", validError: true });
-          }
-        });
-    }
-  }
+
   render() {
     return (
       <div>
         <Sidebar></Sidebar>
         <div className="admin-wrapper col-12">
           <div className="admin-content">
-            <div className="admin-head">Menu - Add New</div>
+            <div className="admin-head">Private Page - Add New</div>
             <div className="admin-data">
               <div className="container-fluid p-0">
                 <form
@@ -167,40 +163,52 @@ class AddMenu extends React.Component {
                     <div className="col-lg-12 p-0"></div>
                     <div className="col-lg-12 p-0">
                       <div className="form-group tags-field row m-0">
-                        <label className="col-lg-2 p-0">Menu Name</label>
+                        <label className="col-lg-2 p-0">Title</label>
                         <input
                           className="form-control col-lg-10"
-                          name="menu"
-                          onChange={this.menuNameChange}
-                          value={this.state.menu}
-                          type="text"
-                          onfocus="this.placeholder = 'Menu Name'"
-                          onblur="this.placeholder = ''"
-                          placeholder="Alt Text"
-                        />
-                        {this.validator.message(
-                          "Menu Name",
-                          this.state.menu,
-                          "required|whitespace|min:1|max:20"
-                        )}
-                        {this.state.mobile_message}
-                      </div>
-                      <div className="form-group tags-field row m-0">
-                        <label className="col-lg-2 p-0">Description</label>
-                        <textarea
-                          className="form-control col-lg-10"
-                          name="description"
-                          onChange={this.handleChange}
-                          value={this.state.description}
+                          name="title"
+                          onChange={this.onChange}
+                          value={this.state.title}
                           type="text"
                           onfocus="this.placeholder = 'Menu Name'"
                           onblur="this.placeholder = ''"
                           placeholder=""
                         />
                         {this.validator.message(
+                          "Title",
+                          this.state.title,
+                          "required|whitespace|min:1|max:300"
+                        )}
+                        {this.state.mobile_message}
+                      </div>
+
+                      <div className="form-group tags-field row m-0">
+                        <label className="col-lg-2 p-0">Description</label>
+                        {/* <textarea
+                          className="form-control col-lg-10"
+                          name="description"
+                          onChange={this.onChange}
+                          value={this.state.description}
+                          type="text"
+                          onfocus="this.placeholder = 'Menu Name'"
+                          onblur="this.placeholder = ''"
+                          placeholder=""
+                        /> */}
+                        <ReactQuill
+                          className=" col-lg-10 height"
+                          theme={this.state.theme}
+                          onChange={this.handleChange}
+                          value={this.state.description}
+                          modules={AddPrivatePage.modules}
+                          formats={AddPrivatePage.formats}
+                          bounds={".app"}
+                          placeholder={this.props.placeholder}
+                        />
+
+                        {this.validator.message(
                           "Description",
                           this.state.description,
-                          "required|whitespace|min:40|max:200"
+                          "required"
                         )}
                       </div>
                     </div>
@@ -210,7 +218,7 @@ class AddMenu extends React.Component {
                         <label className="col-lg-2 p-0" />
                         <div className="col-lg-6 p-0">
                           <button
-                            className="button button-contactForm boxed-btn"
+                            className="button button-contactForm boxed-btn margin"
                             type="submit"
                           >
                             Save
@@ -228,5 +236,43 @@ class AddMenu extends React.Component {
     );
   }
 }
+AddPrivatePage.modules = {
+  toolbar: [
+    [{ header: "1" }, { header: "2" }, { font: [] }],
+    [{ size: [] }],
+    ["bold", "italic", "underline", "strike", "blockquote"],
+    [
+      { list: "ordered" },
+      { list: "bullet" },
+      { indent: "-1" },
+      { indent: "+1" },
+    ],
+    ["link", "image", "video"],
+    ["clean"],
+  ],
+  clipboard: {
+    matchVisual: false,
+  },
+};
 
-export default AddMenu;
+AddPrivatePage.formats = [
+  "header",
+  "font",
+  "size",
+  "bold",
+  "italic",
+  "underline",
+  "strike",
+  "blockquote",
+  "list",
+  "bullet",
+  "indent",
+  "link",
+  "image",
+  "video",
+];
+
+AddPrivatePage.propTypes = {
+  placeholder: PropTypes.string,
+};
+export default AddPrivatePage;

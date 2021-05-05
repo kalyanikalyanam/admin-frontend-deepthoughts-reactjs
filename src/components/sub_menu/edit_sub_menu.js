@@ -3,18 +3,22 @@ import React from "react";
 import Sidebar from "../../components/Sidebar";
 import Loader from "react-loader-spinner";
 import SimpleReactValidator from "simple-react-validator";
-class EditMenu extends React.Component {
+class EditSubMenu extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      menu: "",
+      submenu: "",
       description: "",
-      date: Date.now(),
+      description1: "",
+      image: "",
+      menu: "",
       mobile_message: "",
       validError: false,
       loading: false,
     };
     this.handleChange = this.handleChange.bind(this);
+    // this.subMenuNameChange = this.subMenuNameChange.bind(this);
+    this.onFileChange = this.onFileChange.bind(this);
 
     this.handleSubmit = this.handleSubmit.bind(this);
     this.validator = new SimpleReactValidator({
@@ -103,25 +107,57 @@ class EditMenu extends React.Component {
       },
     });
   }
+  // componentDidMount() {
+  //   const { _id } = this.props.match.params;
+  //   console.log(_id);
+  //   axios
+  //     .get(
+  //       `https://deepthoughts-nodejs.herokuapp.com/admin/update_sub_menu/${_id}`
+  //     )
+  //     .then((res) => {
+  //       console.log(res.data);
+
+  //       this.setState(res.data);
+  //     });
+
+  //   this.menu();
+  // }
+
   componentDidMount() {
     const { _id } = this.props.match.params;
     console.log(_id);
     axios
-      .get(`https://deepthoughts-nodejs.herokuapp.com/admin/update_menu/${_id}`)
+      .get(
+        `https://deepthoughts-nodejs.herokuapp.com/admin/update_sub_menu/${_id}`
+      )
       .then((res) => {
         console.log(res.data);
-        const menu = {
-          menu: res.data.menu,
+        const submenu = {
+          submenu: res.data.submenu,
           description: res.data.description,
-          date: res.data.date,
+          description1: res.data.description1,
+          image: res.data.image,
+          menu: res.data.menu,
         };
-        console.log(menu.menu);
+        console.log(submenu.sub_menu);
         this.setState({
-          menu: menu.menu,
-          description: menu.description,
-          date: menu.date,
+          submenu: submenu.submenu,
+          description: submenu.description,
+          description1: submenu.description1,
+          image: submenu.image,
+          menu: submenu.menu,
           loading: true,
         });
+      });
+    this.menu();
+  }
+  menu() {
+    axios
+      .get(`https://deepthoughts-nodejs.herokuapp.com/admin/menus`)
+      .then((res) => {
+        const menus = res.data;
+        this.setState({ menus });
+        console.log(menus);
       });
   }
 
@@ -135,36 +171,40 @@ class EditMenu extends React.Component {
     const { _id } = this.props.match.params;
     e.preventDefault();
     if (this.validator.allValid()) {
-      const menu = {
-        menu: this.state.menu,
-        description: this.state.description,
-        date: this.state.date,
-      };
+      const formdata = new FormData();
+      formdata.append("submenu", this.state.submenu);
+      formdata.append("description", this.state.description);
+      formdata.append("description1", this.state.description1);
+      formdata.append("menu", this.state.menu);
+      formdata.append("file", this.state.image);
       axios
         .put(
-          `https://deepthoughts-nodejs.herokuapp.com/admin/update_menu_patch/${_id}`,
-          menu
+          `https://deepthoughts-nodejs.herokuapp.com/admin/update_sub_menu_patch/${_id}`,
+          formdata
         )
         .then((res) => console.log(res.data));
-      this.forceUpdate();
-      this.props.history.push("/menu");
+
+      this.props.history.push("/sub_menu");
     } else {
       this.validator.showMessages();
       this.forceUpdate();
     }
   }
 
+  onFileChange(e) {
+    this.setState({ image: e.target.files[0] });
+  }
   render() {
     return (
       <div>
         <Sidebar></Sidebar>
         <div className="admin-wrapper col-12">
           <div className="admin-content">
-            <div className="admin-head">Edit Menu</div>
+            <div className="admin-head">Edit Sub Menu</div>
             {this.state.loading ? (
               <div className="admin-data">
                 <div className="col-lg-12 p-0 text-right mb-30">
-                  <a href="/menu">
+                  <a href="/sub_menu">
                     <button className="button button-contactForm boxed-btn">
                       Back
                     </button>
@@ -179,26 +219,45 @@ class EditMenu extends React.Component {
                       <div className="col-lg-12 p-0"></div>
                       <div className="col-lg-12 p-0">
                         <div className="form-group tags-field row m-0">
-                          <label className="col-lg-2 p-0"> Menu Name</label>
+                          <label className="col-lg-2 p-0">Sub Menu Name</label>
                           <input
                             className="form-control col-lg-10"
-                            name="menu"
+                            name="submenu"
                             onChange={this.handleChange}
-                            value={this.state.menu}
+                            value={this.state.submenu}
                             type="text"
                             onfocus="this.placeholder = 'Menu Name'"
                             onblur="this.placeholder = ''"
                             placeholder=""
                           />
                           {this.validator.message(
-                            " Menu Name",
-                            this.state.menu,
+                            "Sub Menu Name",
+                            this.state.submenu,
                             "required|whitespace|min:1|max:20"
                           )}
                           {this.state.mobile_message}
                         </div>
+
                         <div className="form-group tags-field row m-0">
-                          <label className="col-lg-2 p-0">Description</label>
+                          <label className="col-lg-2 p-0">Upload Image</label>
+                          <input
+                            type="file"
+                            onChange={this.onFileChange}
+                            name="file"
+                            className="form-control col-lg-10"
+                          />
+
+                          {this.validator.message(
+                            "Image",
+                            this.state.image,
+                            "required"
+                          )}
+                        </div>
+
+                        <div className="form-group tags-field row m-0">
+                          <label className="col-lg-2 p-0">
+                            Short Description
+                          </label>
                           <textarea
                             className="form-control col-lg-10"
                             name="description"
@@ -212,8 +271,55 @@ class EditMenu extends React.Component {
                           {this.validator.message(
                             "Description",
                             this.state.description,
-                            "required|whitespace|min:40|max:200"
+                            "required|whitespace|min:40|max:70"
                           )}
+                        </div>
+                        <div className="form-group tags-field row m-0">
+                          <label className="col-lg-2 p-0">
+                            Expand Description
+                          </label>
+                          <textarea
+                            className="form-control col-lg-10"
+                            name="description1"
+                            onChange={this.handleChange}
+                            value={this.state.description1}
+                            type="text"
+                            onfocus="this.placeholder = 'Menu Name'"
+                            onblur="this.placeholder = ''"
+                            placeholder=""
+                          />
+                          {this.validator.message(
+                            "Description",
+                            this.state.description1,
+                            "required|whitespace|min:70|max:200"
+                          )}
+                        </div>
+
+                        <div className="form-group tags-field row m-0">
+                          <label className="col-lg-2 p-0">Menu Name</label>
+
+                          <select
+                            className="form-control col-lg-10"
+                            name="menu"
+                            onChange={this.handleChange}
+                          >
+                            <option>{this.state.menu}</option>
+                            {this.state.menus &&
+                              this.state.menus.map((data, index) => {
+                                return (
+                                  <option value={data.menu} key={index}>
+                                    {data.menu}
+                                  </option>
+                                );
+                              })}
+                          </select>
+
+                          {this.validator.message(
+                            "Menu Name",
+                            this.state.menu,
+                            "required"
+                          )}
+                          {this.state.mobile_message}
                         </div>
                       </div>
 
@@ -253,4 +359,4 @@ class EditMenu extends React.Component {
   }
 }
 
-export default EditMenu;
+export default EditSubMenu;

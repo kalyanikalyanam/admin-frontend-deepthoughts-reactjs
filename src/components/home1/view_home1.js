@@ -3,19 +3,23 @@ import React from "react";
 import Sidebar from "../../components/Sidebar";
 import SimpleReactValidator from "simple-react-validator";
 import Loader from "react-loader-spinner";
-class ViewMenu extends React.Component {
+class ViewHome1 extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      menu: "",
-      date: Date.now(),
+      title: "",
+      subtitle: "",
+      video: "",
+
       mobile_message: "",
       validError: false,
       loading: false,
     };
     this.handleChange = this.handleChange.bind(this);
+
+    this.onFileChange = this.onFileChange.bind(this);
+
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.menuNameChange = this.menuNameChange.bind(this);
     this.validator = new SimpleReactValidator({
       className: "text-danger",
       validators: {
@@ -106,24 +110,27 @@ class ViewMenu extends React.Component {
     const { _id } = this.props.match.params;
     console.log(_id);
     axios
-      .get(`https://deepthoughts-nodejs.herokuapp.com/admin/update_menu/${_id}`)
+      .get(`https://deepthoughts-nodejs.herokuapp.com/home/update_home1/${_id}`)
       .then((res) => {
         console.log(res.data);
-        const menu = {
-          menu: res.data.menu,
-          description: res.data.description,
-          date: res.data.date,
+        const home1_1 = {
+          title: res.data.title,
+          subtitle: res.data.subtitle,
+          video: res.data.video,
         };
-        console.log(menu.menu);
+        console.log(home1_1.title);
         this.setState({
-          menu: menu.menu,
-          description: menu.description,
-          date: menu.date,
+          title: home1_1.title,
+          subtitle: home1_1.subtitle,
+          video: home1_1.video,
           loading: true,
         });
       });
   }
 
+  onFileChange(e) {
+    this.setState({ video: e.target.files[0] });
+  }
   handleChange(event) {
     this.setState({
       [event.target.name]: event.target.value,
@@ -134,40 +141,22 @@ class ViewMenu extends React.Component {
     const { _id } = this.props.match.params;
     e.preventDefault();
     if (this.validator.allValid()) {
-      const menu = {
-        menu: this.state.menu,
-        date: Date.now(),
-      };
+      const formdata = new FormData();
+      formdata.append("title", this.state.title);
+      formdata.append("subtitle", this.state.subtitle);
+      formdata.append("video", this.state.video);
+
       axios
         .put(
-          `https://deepthoughts-nodejs.herokuapp.com/admin/update_menu_patch/${_id}`,
-          menu
+          `https://deepthoughts-nodejs.herokuapp.com/home/update_home1_patch/${_id}`,
+          formdata
         )
         .then((res) => console.log(res.data));
 
-      this.props.history.push("/menu");
+      this.props.history.push("/home_section_1");
     } else {
       this.validator.showMessages();
       this.forceUpdate();
-    }
-  }
-  menuNameChange(e) {
-    this.setState({
-      menu: e.target.value,
-    });
-    if (this.state.validError != true) {
-      axios
-        .get(`https://deepthoughts-nodejs.herokuapp.com/admin/menus`)
-        .then((res) => {
-          if (this.state.menu > 1) {
-            this.setState({
-              mobile_message: "Menu already exist",
-              validError: false,
-            });
-          } else {
-            this.setState({ mobile_message: "", validError: true });
-          }
-        });
     }
   }
 
@@ -177,11 +166,11 @@ class ViewMenu extends React.Component {
         <Sidebar></Sidebar>
         <div className="admin-wrapper col-12">
           <div className="admin-content">
-            <div className="admin-head">Menu - View</div>
+            <div className="admin-head">Home Section 1 - View</div>
             {this.state.loading ? (
               <div className="admin-data">
                 <div className="col-lg-12 p-0 text-right mb-30">
-                  <a href="/menu">
+                  <a href="/home_section_1">
                     <button className="button button-contactForm boxed-btn">
                       Back
                     </button>
@@ -192,21 +181,19 @@ class ViewMenu extends React.Component {
                     <tbody>
                       <tr>
                         <td valign="top" width="150px;">
-                          <b>Menu Name</b>
+                          <b>Video</b>
                         </td>
-                        <td>{this.state.menu}</td>
-                      </tr>
-                      <tr>
-                        <td valign="top">
-                          <b>Updated Date</b>
+                        <td>
+                          <iframe
+                            width="560"
+                            height="315"
+                            src={this.state.video}
+                            title="YouTube video player"
+                            frameborder="0"
+                            allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen
+                          ></iframe>
                         </td>
-                        <td>{this.state.date}</td>
-                      </tr>
-                      <tr>
-                        <td valign="top" width="150px;">
-                          <b>Description</b>
-                        </td>
-                        <td>{this.state.description}</td>
                       </tr>
                     </tbody>
                   </table>
@@ -231,4 +218,4 @@ class ViewMenu extends React.Component {
   }
 }
 
-export default ViewMenu;
+export default ViewHome1;

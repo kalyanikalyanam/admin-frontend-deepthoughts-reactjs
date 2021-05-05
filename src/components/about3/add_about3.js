@@ -2,18 +2,22 @@ import axios from "axios";
 import React from "react";
 import Sidebar from "../../components/Sidebar";
 import SimpleReactValidator from "simple-react-validator";
-class AddMenu extends React.Component {
+class AddAbout3 extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      menu: "",
-      description: "",
-      data: Date.now(),
+      name: "",
+      designation: "",
+      image: "",
+      twitter: "",
+      facebook: "",
+      google: "",
       mobile_message: "",
       validError: false,
     };
     this.handleChange = this.handleChange.bind(this);
-    this.menuNameChange = this.menuNameChange.bind(this);
+
+    this.onFileChange = this.onFileChange.bind(this);
 
     this.handleSubmit = this.handleSubmit.bind(this);
     this.validator = new SimpleReactValidator({
@@ -102,61 +106,56 @@ class AddMenu extends React.Component {
       },
     });
   }
-
+  onFileChange(e) {
+    this.setState({ image: e.target.files[0] });
+  }
   handleChange(event) {
     this.setState({
       [event.target.name]: event.target.value,
     });
   }
-
-  handleSubmit(event) {
-    event.preventDefault();
+  handleSubmit(e) {
+    e.preventDefault();
     if (this.validator.allValid()) {
-      const menu = {
-        menu: this.state.menu,
-        description: this.state.description,
-        date: Date.now(),
-      };
-      console.log(menu);
-      axios
-        .post(`https://deepthoughts-nodejs.herokuapp.com/admin/add_menu`, menu)
-        .then((res) => {
-          console.log(res);
-          console.log(res.data);
-        });
+      const formdata = new FormData();
+      formdata.append("name", this.state.name);
+      formdata.append("designation", this.state.designation);
+      formdata.append("file", this.state.image);
+      formdata.append("twitter", this.state.twitter);
+      formdata.append("facebook", this.state.facebook);
+      formdata.append("google", this.state.google);
 
-      this.props.history.push("/menu");
+      axios
+        .post(
+          "https://deepthoughts-nodejs.herokuapp.com/about/AddAbout3",
+
+          formdata
+        )
+        .then(function (response) {
+          // handle success
+
+          console.log(response.data);
+
+          this.setState({ formdata });
+        })
+        .catch(function (error) {
+          // handle error
+          console.log(error);
+        });
+      this.props.history.push("/About_section_3");
     } else {
       this.validator.showMessages();
       this.forceUpdate();
     }
   }
-  menuNameChange(e) {
-    this.setState({
-      menu: e.target.value,
-    });
-    if (this.state.validError != true) {
-      axios
-        .get(`https://deepthoughts-nodejs.herokuapp.com/admin/menus`)
-        .then((res) => {
-          if (this.state.menu > 0) {
-            this.setState({
-              mobile_message: "Menu already exist",
-              validError: false,
-            });
-          } else {
-            this.setState({ mobile_message: "", validError: true });
-          }
-        });
-    }
-  }
+
   render() {
     return (
       <div>
         <Sidebar></Sidebar>
         <div className="admin-wrapper col-12">
           <div className="admin-content">
-            <div className="admin-head">Menu - Add New</div>
+            <div className="admin-head">Add Leadership Team</div>
             <div className="admin-data">
               <div className="container-fluid p-0">
                 <form
@@ -167,40 +166,109 @@ class AddMenu extends React.Component {
                     <div className="col-lg-12 p-0"></div>
                     <div className="col-lg-12 p-0">
                       <div className="form-group tags-field row m-0">
-                        <label className="col-lg-2 p-0">Menu Name</label>
+                        <label className="col-lg-2 p-0">Name</label>
                         <input
                           className="form-control col-lg-10"
-                          name="menu"
-                          onChange={this.menuNameChange}
-                          value={this.state.menu}
-                          type="text"
-                          onfocus="this.placeholder = 'Menu Name'"
-                          onblur="this.placeholder = ''"
-                          placeholder="Alt Text"
-                        />
-                        {this.validator.message(
-                          "Menu Name",
-                          this.state.menu,
-                          "required|whitespace|min:1|max:20"
-                        )}
-                        {this.state.mobile_message}
-                      </div>
-                      <div className="form-group tags-field row m-0">
-                        <label className="col-lg-2 p-0">Description</label>
-                        <textarea
-                          className="form-control col-lg-10"
-                          name="description"
+                          name="name"
                           onChange={this.handleChange}
-                          value={this.state.description}
+                          value={this.state.name}
                           type="text"
                           onfocus="this.placeholder = 'Menu Name'"
                           onblur="this.placeholder = ''"
                           placeholder=""
                         />
                         {this.validator.message(
-                          "Description",
-                          this.state.description,
-                          "required|whitespace|min:40|max:200"
+                          "Name",
+                          this.state.name,
+                          "required|whitespace|min:1|max:20"
+                        )}
+                      </div>
+                      <div className="form-group tags-field row m-0">
+                        <label className="col-lg-2 p-0">Designation</label>
+                        <input
+                          className="form-control col-lg-10"
+                          name="designation"
+                          onChange={this.handleChange}
+                          value={this.state.designation}
+                          type="text"
+                          onfocus="this.placeholder = 'Menu Name'"
+                          onblur="this.placeholder = ''"
+                          placeholder=""
+                        />
+                        {this.validator.message(
+                          "Designation",
+                          this.state.designation,
+                          "required|whitespace|min:1|max:40"
+                        )}
+                      </div>
+
+                      <div className="form-group tags-field row m-0">
+                        <label className="col-lg-2 p-0">Upload Image</label>
+                        <input
+                          type="file"
+                          onChange={this.onFileChange}
+                          name="file"
+                          className="form-control col-lg-10"
+                        />
+
+                        {this.validator.message(
+                          "Image",
+                          this.state.image,
+                          "required"
+                        )}
+                      </div>
+                      <div className="form-group tags-field row m-0">
+                        <label className="col-lg-2 p-0">Twitter Link</label>
+                        <input
+                          className="form-control col-lg-10"
+                          name="twitter"
+                          onChange={this.handleChange}
+                          value={this.state.twitter}
+                          type="text"
+                          onfocus="this.placeholder = 'Menu Name'"
+                          onblur="this.placeholder = ''"
+                          placeholder=""
+                        />
+                        {this.validator.message(
+                          "Twitter Link",
+                          this.state.twitter,
+                          "url"
+                        )}
+                      </div>
+                      <div className="form-group tags-field row m-0">
+                        <label className="col-lg-2 p-0">Facebook Link</label>
+                        <input
+                          className="form-control col-lg-10"
+                          name="facebook"
+                          onChange={this.handleChange}
+                          value={this.state.facebook}
+                          type="text"
+                          onfocus="this.placeholder = 'Menu Name'"
+                          onblur="this.placeholder = ''"
+                          placeholder=""
+                        />
+                        {this.validator.message(
+                          "Facebook Link",
+                          this.state.facebook,
+                          "url"
+                        )}
+                      </div>
+                      <div className="form-group tags-field row m-0">
+                        <label className="col-lg-2 p-0">Google Link</label>
+                        <input
+                          className="form-control col-lg-10"
+                          name="google"
+                          onChange={this.handleChange}
+                          value={this.state.google}
+                          type="text"
+                          onfocus="this.placeholder = 'Menu Name'"
+                          onblur="this.placeholder = ''"
+                          placeholder=""
+                        />
+                        {this.validator.message(
+                          "Google Link",
+                          this.state.google,
+                          "url"
                         )}
                       </div>
                     </div>
@@ -229,4 +297,4 @@ class AddMenu extends React.Component {
   }
 }
 
-export default AddMenu;
+export default AddAbout3;

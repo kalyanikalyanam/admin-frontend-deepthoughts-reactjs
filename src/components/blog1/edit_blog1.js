@@ -1,22 +1,30 @@
 import axios from "axios";
 import React from "react";
 import Sidebar from "../../components/Sidebar";
-import Loader from "react-loader-spinner";
 import SimpleReactValidator from "simple-react-validator";
-class EditMenu extends React.Component {
+import PropTypes from "prop-types";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
+import Loader from "react-loader-spinner";
+class EditBlog1 extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      menu: "",
+      title: "",
+      category: "",
       description: "",
+      image: "",
       date: Date.now(),
+      theme: "snow",
       mobile_message: "",
       validError: false,
       loading: false,
     };
     this.handleChange = this.handleChange.bind(this);
-
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.onFileChange = this.onFileChange.bind(this);
+    this.onChange = this.onChange.bind(this);
+
     this.validator = new SimpleReactValidator({
       className: "text-danger",
       validators: {
@@ -107,47 +115,94 @@ class EditMenu extends React.Component {
     const { _id } = this.props.match.params;
     console.log(_id);
     axios
-      .get(`https://deepthoughts-nodejs.herokuapp.com/admin/update_menu/${_id}`)
+      .get(`https://deepthoughts-nodejs.herokuapp.com/blog/update_blog1/${_id}`)
       .then((res) => {
         console.log(res.data);
-        const menu = {
-          menu: res.data.menu,
+        const post = {
+          title: res.data.title,
+          category: res.data.category,
+          image: res.data.image,
           description: res.data.description,
           date: res.data.date,
         };
-        console.log(menu.menu);
+        console.log(post.title);
         this.setState({
-          menu: menu.menu,
-          description: menu.description,
-          date: menu.date,
+          title: post.title,
+          category: post.category,
+          image: post.image,
+          description: post.description,
+          date: post.date,
           loading: true,
         });
       });
+
+    axios
+      .get(`https://deepthoughts-nodejs.herokuapp.com/blog/blogcategorys`)
+      .then((res) => {
+        const blogcategories = res.data;
+        console.log(blogcategories);
+        this.setState({ blogcategories });
+      });
   }
 
-  handleChange(event) {
+  handleChange(html) {
+    this.setState({ description: html });
+  }
+  onChange(event) {
     this.setState({
       [event.target.name]: event.target.value,
     });
   }
+  onFileChange(e) {
+    this.setState({ image: e.target.files[0] });
+  }
+  handleThemeChange(newTheme) {
+    if (newTheme === "core") newTheme = null;
+    this.setState({ theme: newTheme });
+  }
+
+  //   handleSubmit(e) {
+  //     const { _id } = this.props.match.params;
+  //     e.preventDefault();
+  //     if (this.validator.allValid()) {
+  //       const post = {
+  //         title: this.state.title,
+  //         category: this.state.category,
+  //         description: this.state.description,
+  //       };
+  //       axios
+  //         .put(
+  //           `https://deepthoughts-nodejs.herokuapp.com/blog/update_blog1_patch/${_id}`,
+  //           post
+  //         )
+  //         .then((res) => console.log(res.data));
+
+  //       this.props.history.push("/article");
+  //     } else {
+  //       this.validator.showMessages();
+  //       this.forceUpdate();
+  //     }
+  //   }
 
   handleSubmit(e) {
     const { _id } = this.props.match.params;
     e.preventDefault();
     if (this.validator.allValid()) {
-      const menu = {
-        menu: this.state.menu,
-        description: this.state.description,
-        date: this.state.date,
-      };
+      const formdata = new FormData();
+      formdata.append("title", this.state.title);
+      formdata.append("category", this.state.category);
+      formdata.append("description", this.state.description);
+      formdata.append("file", this.state.image);
+      formdata.append("date", Date.now());
+
       axios
         .put(
-          `https://deepthoughts-nodejs.herokuapp.com/admin/update_menu_patch/${_id}`,
-          menu
+          `https://deepthoughts-nodejs.herokuapp.com/blog/update_blog1_patch/${_id}`,
+          formdata
         )
         .then((res) => console.log(res.data));
-      this.forceUpdate();
-      this.props.history.push("/menu");
+
+      this.props.history.push("/article");
     } else {
       this.validator.showMessages();
       this.forceUpdate();
@@ -160,11 +215,11 @@ class EditMenu extends React.Component {
         <Sidebar></Sidebar>
         <div className="admin-wrapper col-12">
           <div className="admin-content">
-            <div className="admin-head">Edit Menu</div>
+            <div className="admin-head">Edit Article</div>
             {this.state.loading ? (
               <div className="admin-data">
                 <div className="col-lg-12 p-0 text-right mb-30">
-                  <a href="/menu">
+                  <a href="/article">
                     <button className="button button-contactForm boxed-btn">
                       Back
                     </button>
@@ -179,50 +234,107 @@ class EditMenu extends React.Component {
                       <div className="col-lg-12 p-0"></div>
                       <div className="col-lg-12 p-0">
                         <div className="form-group tags-field row m-0">
-                          <label className="col-lg-2 p-0"> Menu Name</label>
+                          <label className="col-lg-2 p-0">Title</label>
                           <input
                             className="form-control col-lg-10"
-                            name="menu"
-                            onChange={this.handleChange}
-                            value={this.state.menu}
+                            name="title"
+                            onChange={this.onChange}
+                            value={this.state.title}
                             type="text"
                             onfocus="this.placeholder = 'Menu Name'"
                             onblur="this.placeholder = ''"
                             placeholder=""
                           />
                           {this.validator.message(
-                            " Menu Name",
-                            this.state.menu,
-                            "required|whitespace|min:1|max:20"
+                            "Title",
+                            this.state.title,
+                            "required|whitespace|min:1|max:150"
                           )}
                           {this.state.mobile_message}
                         </div>
                         <div className="form-group tags-field row m-0">
-                          <label className="col-lg-2 p-0">Description</label>
-                          <textarea
+                          <label className="col-lg-2 p-0">Category Name</label>
+
+                          <select
                             className="form-control col-lg-10"
-                            name="description"
+                            name="category"
+                            value={this.state.category}
+                            onChange={this.onChange}
+                          >
+                            <option>Select Blog Category</option>
+                            {this.state.blogcategories &&
+                              this.state.blogcategories.map((data, index) => {
+                                return (
+                                  <option value={data.category} key={index}>
+                                    {data.category}
+                                  </option>
+                                );
+                              })}
+                          </select>
+
+                          {this.validator.message(
+                            "category Name",
+                            this.state.category,
+                            "required"
+                          )}
+                        </div>
+
+                        <div className="form-group tags-field row m-0">
+                          <label className="col-lg-2 p-0">Upload Image</label>
+                          <input
+                            type="file"
+                            onChange={this.onFileChange}
+                            name="file"
+                            className="form-control col-lg-10"
+                          />
+
+                          {this.validator.message(
+                            "Image",
+                            this.state.image,
+                            "required"
+                          )}
+                        </div>
+
+                        <div className="form-group tags-field row m-0">
+                          <label className="col-lg-2 p-0">Description</label>
+                          {/* <textarea
+                          className="form-control col-lg-10"
+                          name="description"
+                          onChange={this.onChange}
+                          value={this.state.description}
+                          type="text"
+                          onfocus="this.placeholder = 'Menu Name'"
+                          onblur="this.placeholder = ''"
+                          placeholder=""
+                        /> */}
+                          <ReactQuill
+                            className=" col-lg-10 height"
+                            theme={this.state.theme}
                             onChange={this.handleChange}
                             value={this.state.description}
-                            type="text"
-                            onfocus="this.placeholder = 'Menu Name'"
-                            onblur="this.placeholder = ''"
-                            placeholder=""
+                            modules={EditBlog1.modules}
+                            formats={EditBlog1.formats}
+                            bounds={".app"}
+                            placeholder={this.props.placeholder}
                           />
+
                           {this.validator.message(
                             "Description",
                             this.state.description,
-                            "required|whitespace|min:40|max:200"
+                            "required"
                           )}
                         </div>
                       </div>
+
+                      <br />
+                      <hr />
 
                       <div className="col-lg-12 p-0">
                         <div className="form-group tags-field  row m-0">
                           <label className="col-lg-2 p-0" />
                           <div className="col-lg-6 p-0">
                             <button
-                              className="button button-contactForm boxed-btn"
+                              className="button button-contactForm boxed-btn margin"
                               type="submit"
                             >
                               Save
@@ -252,5 +364,43 @@ class EditMenu extends React.Component {
     );
   }
 }
+EditBlog1.modules = {
+  toolbar: [
+    [{ header: "1" }, { header: "2" }, { font: [] }],
+    [{ size: [] }],
+    ["bold", "italic", "underline", "strike", "blockquote"],
+    [
+      { list: "ordered" },
+      { list: "bullet" },
+      { indent: "-1" },
+      { indent: "+1" },
+    ],
+    ["link", "image", "video"],
+    ["clean"],
+  ],
+  clipboard: {
+    matchVisual: false,
+  },
+};
 
-export default EditMenu;
+EditBlog1.formats = [
+  "header",
+  "font",
+  "size",
+  "bold",
+  "italic",
+  "underline",
+  "strike",
+  "blockquote",
+  "list",
+  "bullet",
+  "indent",
+  "link",
+  "image",
+  "video",
+];
+
+EditBlog1.propTypes = {
+  placeholder: PropTypes.string,
+};
+export default EditBlog1;

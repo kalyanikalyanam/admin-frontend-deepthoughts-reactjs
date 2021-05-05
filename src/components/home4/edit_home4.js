@@ -1,20 +1,25 @@
 import axios from "axios";
 import React from "react";
 import Sidebar from "../../components/Sidebar";
-import Loader from "react-loader-spinner";
 import SimpleReactValidator from "simple-react-validator";
-class EditMenu extends React.Component {
+import Loader from "react-loader-spinner";
+class EditHome4 extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      menu: "",
+      title: "",
+
       description: "",
-      date: Date.now(),
+      image: "",
+      url: "",
+
       mobile_message: "",
       validError: false,
       loading: false,
     };
     this.handleChange = this.handleChange.bind(this);
+
+    this.onFileChange = this.onFileChange.bind(this);
 
     this.handleSubmit = this.handleSubmit.bind(this);
     this.validator = new SimpleReactValidator({
@@ -107,24 +112,29 @@ class EditMenu extends React.Component {
     const { _id } = this.props.match.params;
     console.log(_id);
     axios
-      .get(`https://deepthoughts-nodejs.herokuapp.com/admin/update_menu/${_id}`)
+      .get(`https://deepthoughts-nodejs.herokuapp.com/home/update_home4/${_id}`)
       .then((res) => {
         console.log(res.data);
-        const menu = {
-          menu: res.data.menu,
+        const home4 = {
+          title: res.data.title,
           description: res.data.description,
-          date: res.data.date,
+          image: res.data.image,
+          url: res.data.url,
         };
-        console.log(menu.menu);
+        console.log(home4.title);
         this.setState({
-          menu: menu.menu,
-          description: menu.description,
-          date: menu.date,
+          title: home4.title,
+          description: home4.description,
+          image: home4.image,
+          url: home4.url,
           loading: true,
         });
       });
   }
 
+  onFileChange(e) {
+    this.setState({ image: e.target.files[0] });
+  }
   handleChange(event) {
     this.setState({
       [event.target.name]: event.target.value,
@@ -135,19 +145,20 @@ class EditMenu extends React.Component {
     const { _id } = this.props.match.params;
     e.preventDefault();
     if (this.validator.allValid()) {
-      const menu = {
-        menu: this.state.menu,
-        description: this.state.description,
-        date: this.state.date,
-      };
+      const formdata = new FormData();
+      formdata.append("title", this.state.title);
+      formdata.append("description", this.state.description);
+      formdata.append("file", this.state.image);
+      formdata.append("url", this.state.url);
+
       axios
         .put(
-          `https://deepthoughts-nodejs.herokuapp.com/admin/update_menu_patch/${_id}`,
-          menu
+          `https://deepthoughts-nodejs.herokuapp.com/home/update_home4_patch/${_id}`,
+          formdata
         )
         .then((res) => console.log(res.data));
-      this.forceUpdate();
-      this.props.history.push("/menu");
+
+      this.props.history.push("/home_section_4");
     } else {
       this.validator.showMessages();
       this.forceUpdate();
@@ -160,11 +171,11 @@ class EditMenu extends React.Component {
         <Sidebar></Sidebar>
         <div className="admin-wrapper col-12">
           <div className="admin-content">
-            <div className="admin-head">Edit Menu</div>
+            <div className="admin-head">Edit Home Section 4</div>
             {this.state.loading ? (
               <div className="admin-data">
                 <div className="col-lg-12 p-0 text-right mb-30">
-                  <a href="/menu">
+                  <a href="/home_section_4">
                     <button className="button button-contactForm boxed-btn">
                       Back
                     </button>
@@ -179,24 +190,24 @@ class EditMenu extends React.Component {
                       <div className="col-lg-12 p-0"></div>
                       <div className="col-lg-12 p-0">
                         <div className="form-group tags-field row m-0">
-                          <label className="col-lg-2 p-0"> Menu Name</label>
+                          <label className="col-lg-2 p-0">Title</label>
                           <input
                             className="form-control col-lg-10"
-                            name="menu"
+                            name="title"
                             onChange={this.handleChange}
-                            value={this.state.menu}
+                            value={this.state.title}
                             type="text"
                             onfocus="this.placeholder = 'Menu Name'"
                             onblur="this.placeholder = ''"
                             placeholder=""
                           />
                           {this.validator.message(
-                            " Menu Name",
-                            this.state.menu,
-                            "required|whitespace|min:1|max:20"
+                            "Title",
+                            this.state.title,
+                            "required|whitespace|min:1|max:40"
                           )}
-                          {this.state.mobile_message}
                         </div>
+
                         <div className="form-group tags-field row m-0">
                           <label className="col-lg-2 p-0">Description</label>
                           <textarea
@@ -212,7 +223,40 @@ class EditMenu extends React.Component {
                           {this.validator.message(
                             "Description",
                             this.state.description,
-                            "required|whitespace|min:40|max:200"
+                            "required|whitespace|min:40|max:400"
+                          )}
+                        </div>
+                        <div className="form-group tags-field row m-0">
+                          <label className="col-lg-2 p-0">Upload Image</label>
+                          <input
+                            type="file"
+                            onChange={this.onFileChange}
+                            name="file"
+                            className="form-control col-lg-10"
+                          />
+
+                          {this.validator.message(
+                            "Image",
+                            this.state.image,
+                            "required"
+                          )}
+                        </div>
+                        <div className="form-group tags-field row m-0">
+                          <label className="col-lg-2 p-0">Link</label>
+                          <input
+                            className="form-control col-lg-10"
+                            name="url"
+                            onChange={this.handleChange}
+                            value={this.state.url}
+                            type="text"
+                            onfocus="this.placeholder = 'Menu Name'"
+                            onblur="this.placeholder = ''"
+                            placeholder=""
+                          />
+                          {this.validator.message(
+                            "Link",
+                            this.state.url,
+                            "required|url"
                           )}
                         </div>
                       </div>
@@ -253,4 +297,4 @@ class EditMenu extends React.Component {
   }
 }
 
-export default EditMenu;
+export default EditHome4;

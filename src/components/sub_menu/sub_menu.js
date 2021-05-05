@@ -1,18 +1,18 @@
 import React from "react";
 import Sidebar from "../../components/Sidebar";
-import { Link } from "react-router-dom";
 import axios from "axios";
+import { Link } from "react-router-dom";
 import swal from "sweetalert";
-import Loader from "react-loader-spinner";
 import ReactPaginate from "react-paginate";
+import Loader from "react-loader-spinner";
 const PER_PAGE = 10;
-class Menu extends React.Component {
+class SubMenu extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      menus: [],
-      loading: false,
+      submenus: [],
       currentPage: 0,
+      loading: false,
     };
     this.deleteItem = this.deleteItem.bind(this);
     this.handlePageClick = this.handlePageClick.bind(this);
@@ -20,25 +20,30 @@ class Menu extends React.Component {
 
   componentDidMount() {
     axios
-      .get(`https://deepthoughts-nodejs.herokuapp.com/admin/menus`)
+      .get(`https://deepthoughts-nodejs.herokuapp.com/admin/submenus`)
       .then((res) => {
-        const menus = res.data;
-        console.log(menus);
-        this.setState({ menus, loading: true });
+        const submenus = res.data;
+        console.log(submenus);
+        this.setState({ submenus, loading: true });
       });
     this.unsubscribe = axios
-      .get(`https://deepthoughts-nodejs.herokuapp.com/admin/menus`)
+      .get(`https://deepthoughts-nodejs.herokuapp.com/admin/submenus`)
       .then((res) => {
-        const menus = res.data;
-        console.log(menus);
-        this.setState({ menus, loading: true });
+        const submenus = res.data;
+        console.log(submenus);
+        this.setState({ submenus, loading: true });
       });
   }
-  handlePageClick({ selected: selectedPage }) {
-    this.setState({
-      currentPage: selectedPage,
-    });
-  }
+  // componentDidMount() {
+  //   axios
+  //     .get(`https://deepthoughts-nodejs.herokuapp.com/admin/submenus`)
+  //     .then((res) => {
+  //       const submenus = res.data;
+  //       console.log(submenus);
+  //       this.setState({ submenus });
+  //     });
+  // }
+
   deleteItem(_id) {
     swal({
       title: "Are you sure?",
@@ -51,7 +56,7 @@ class Menu extends React.Component {
         console.log(_id);
         axios
           .delete(
-            `https://deepthoughts-nodejs.herokuapp.com/admin/delete_menu/${_id}`
+            `https://deepthoughts-nodejs.herokuapp.com/admin/delete_sub_menu/${_id}`
           )
           .then((res) => {
             console.log(res);
@@ -62,51 +67,61 @@ class Menu extends React.Component {
       }
     });
   }
+  handlePageClick({ selected: selectedPage }) {
+    this.setState({
+      currentPage: selectedPage,
+    });
+  }
   render() {
-    const styles = { height: 400, width: "100%" };
     const offset = this.state.currentPage * PER_PAGE;
 
     const currentPageData =
-      this.state.menus &&
-      this.state.menus.slice(offset, offset + PER_PAGE).map((menu, index) => {
-        return (
-          <tr key={index}>
-            <td>{index + 1}</td>
+      this.state.submenus &&
+      this.state.submenus
+        .slice(offset, offset + PER_PAGE)
+        .map((submenu, index) => {
+          return (
+            <tr key={index}>
+              <td>{index + 1}</td>
+              <td>{submenu.submenu}</td>
+              {/* <td>{submenu.description}</td> */}
+              {/* <td>
+                            <img src={submenu.image} height={50} />
+                          </td> */}
+              <td>{submenu.menu}</td>
 
-            <td>{menu.menu}</td>
-            <td>{menu.date}</td>
-            <td>
-              <Link to={`/view_menu/${menu._id}`}>
-                <span className="btn">View</span>
-              </Link>
+              <td>
+                <Link to={`/view_sub_menu/${submenu._id}`}>
+                  <span className="btn">View</span>
+                </Link>
 
-              <Link to={`/edit_menu/${menu._id}`}>
-                <span className="btn">Edit</span>
-              </Link>
-              <span
-                className="btn"
-                onClick={this.deleteItem.bind(this, menu._id)}
-              >
-                Delete
-              </span>
-            </td>
-          </tr>
-        );
-      });
+                <Link to={`/edit_sub_menu/${submenu._id}`}>
+                  <span className="btn">Edit</span>
+                </Link>
+                <span
+                  className="btn"
+                  onClick={this.deleteItem.bind(this, submenu._id)}
+                >
+                  Delete
+                </span>
+              </td>
+            </tr>
+          );
+        });
 
     const pageCount = Math.ceil(
-      this.state.menus && this.state.menus.length / PER_PAGE
+      this.state.submenus && this.state.submenus.length / PER_PAGE
     );
     return (
       <div>
         <Sidebar></Sidebar>
         <div className="admin-wrapper col-12">
           <div className="admin-content">
-            <div className="admin-head">Menu</div>
+            <div className="admin-head">Sub Menu</div>
             {this.state.loading ? (
               <div className="admin-data">
                 <div className="col-lg-12 p-0 text-right mb-30">
-                  <a href="/add_menu">
+                  <a href="add_sub_menu">
                     <button className="button button-contactForm boxed-btn">
                       + Add New
                     </button>
@@ -117,9 +132,11 @@ class Menu extends React.Component {
                     <thead>
                       <tr>
                         <th>S.No</th>
+                        <th>Sub Menu Name</th>
+                        {/* <th>Description</th> */}
+                        {/* <th>image</th> */}
                         <th>Menu Name</th>
 
-                        <th>Updated Date</th>
                         <th>Action</th>
                       </tr>
                     </thead>
@@ -159,4 +176,4 @@ class Menu extends React.Component {
   }
 }
 
-export default Menu;
+export default SubMenu;

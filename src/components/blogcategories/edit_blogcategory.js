@@ -1,21 +1,19 @@
 import axios from "axios";
 import React from "react";
 import Sidebar from "../../components/Sidebar";
-import SimpleReactValidator from "simple-react-validator";
 import Loader from "react-loader-spinner";
-class ViewMenu extends React.Component {
+import SimpleReactValidator from "simple-react-validator";
+class EditBlogCategory extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      menu: "",
-      date: Date.now(),
+      category: "",
       mobile_message: "",
       validError: false,
-      loading: false,
     };
     this.handleChange = this.handleChange.bind(this);
+
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.menuNameChange = this.menuNameChange.bind(this);
     this.validator = new SimpleReactValidator({
       className: "text-danger",
       validators: {
@@ -106,19 +104,17 @@ class ViewMenu extends React.Component {
     const { _id } = this.props.match.params;
     console.log(_id);
     axios
-      .get(`https://deepthoughts-nodejs.herokuapp.com/admin/update_menu/${_id}`)
+      .get(
+        `https://deepthoughts-nodejs.herokuapp.com/blog/update_blogcategory/${_id}`
+      )
       .then((res) => {
         console.log(res.data);
         const menu = {
-          menu: res.data.menu,
-          description: res.data.description,
-          date: res.data.date,
+          category: res.data.category,
         };
         console.log(menu.menu);
         this.setState({
-          menu: menu.menu,
-          description: menu.description,
-          date: menu.date,
+          category: menu.category,
           loading: true,
         });
       });
@@ -134,40 +130,20 @@ class ViewMenu extends React.Component {
     const { _id } = this.props.match.params;
     e.preventDefault();
     if (this.validator.allValid()) {
-      const menu = {
-        menu: this.state.menu,
-        date: Date.now(),
+      const blogcategory = {
+        category: this.state.category,
       };
       axios
         .put(
-          `https://deepthoughts-nodejs.herokuapp.com/admin/update_menu_patch/${_id}`,
-          menu
+          `https://deepthoughts-nodejs.herokuapp.com/blog/update_blogcategory_patch/${_id}`,
+          blogcategory
         )
         .then((res) => console.log(res.data));
-
-      this.props.history.push("/menu");
+      this.forceUpdate();
+      this.props.history.push("/blogcategory");
     } else {
       this.validator.showMessages();
       this.forceUpdate();
-    }
-  }
-  menuNameChange(e) {
-    this.setState({
-      menu: e.target.value,
-    });
-    if (this.state.validError != true) {
-      axios
-        .get(`https://deepthoughts-nodejs.herokuapp.com/admin/menus`)
-        .then((res) => {
-          if (this.state.menu > 1) {
-            this.setState({
-              mobile_message: "Menu already exist",
-              validError: false,
-            });
-          } else {
-            this.setState({ mobile_message: "", validError: true });
-          }
-        });
     }
   }
 
@@ -177,39 +153,60 @@ class ViewMenu extends React.Component {
         <Sidebar></Sidebar>
         <div className="admin-wrapper col-12">
           <div className="admin-content">
-            <div className="admin-head">Menu - View</div>
+            <div className="admin-head">Edit Blog Category</div>
             {this.state.loading ? (
               <div className="admin-data">
                 <div className="col-lg-12 p-0 text-right mb-30">
-                  <a href="/menu">
+                  <a href="/blogcategory">
                     <button className="button button-contactForm boxed-btn">
                       Back
                     </button>
                   </a>
                 </div>
-                <div className="table-responsive admin-table demo">
-                  <table>
-                    <tbody>
-                      <tr>
-                        <td valign="top" width="150px;">
-                          <b>Menu Name</b>
-                        </td>
-                        <td>{this.state.menu}</td>
-                      </tr>
-                      <tr>
-                        <td valign="top">
-                          <b>Updated Date</b>
-                        </td>
-                        <td>{this.state.date}</td>
-                      </tr>
-                      <tr>
-                        <td valign="top" width="150px;">
-                          <b>Description</b>
-                        </td>
-                        <td>{this.state.description}</td>
-                      </tr>
-                    </tbody>
-                  </table>
+                <div className="container-fluid p-0">
+                  <form
+                    className="form-contact contact_form"
+                    onSubmit={this.handleSubmit}
+                  >
+                    <div className="row m-0">
+                      <div className="col-lg-12 p-0"></div>
+                      <div className="col-lg-12 p-0">
+                        <div className="form-group tags-field row m-0">
+                          <label className="col-lg-2 p-0"> Category Name</label>
+                          <input
+                            className="form-control col-lg-10"
+                            name="category"
+                            onChange={this.handleChange}
+                            value={this.state.category}
+                            type="text"
+                            onfocus="this.placeholder = 'Menu Name'"
+                            onblur="this.placeholder = ''"
+                            placeholder=""
+                          />
+                          {this.validator.message(
+                            " Category Name",
+                            this.state.category,
+                            "required|whitespace|min:1|max:50"
+                          )}
+                          {this.state.mobile_message}
+                        </div>
+                      </div>
+
+                      <div className="col-lg-12 p-0">
+                        <div className="form-group tags-field  row m-0">
+                          <label className="col-lg-2 p-0" />
+                          <div className="col-lg-6 p-0">
+                            <button
+                              className="button button-contactForm boxed-btn"
+                              type="submit"
+                            >
+                              Save
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
                 </div>
               </div>
             ) : (
@@ -231,4 +228,4 @@ class ViewMenu extends React.Component {
   }
 }
 
-export default ViewMenu;
+export default EditBlogCategory;

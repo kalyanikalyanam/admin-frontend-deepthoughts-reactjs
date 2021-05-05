@@ -2,18 +2,22 @@ import axios from "axios";
 import React from "react";
 import Sidebar from "../../components/Sidebar";
 import SimpleReactValidator from "simple-react-validator";
-class AddMenu extends React.Component {
+class AddSubMenu extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      menu: "",
+      submenu: "",
       description: "",
-      data: Date.now(),
+      description1: "",
+      image: "",
+      menu: "",
+
       mobile_message: "",
       validError: false,
     };
     this.handleChange = this.handleChange.bind(this);
-    this.menuNameChange = this.menuNameChange.bind(this);
+    // this.subMenuNameChange = this.subMenuNameChange.bind(this);
+    this.onFileChange = this.onFileChange.bind(this);
 
     this.handleSubmit = this.handleSubmit.bind(this);
     this.validator = new SimpleReactValidator({
@@ -102,7 +106,15 @@ class AddMenu extends React.Component {
       },
     });
   }
-
+  componentDidMount() {
+    axios
+      .get(`https://deepthoughts-nodejs.herokuapp.com/admin/menus`)
+      .then((res) => {
+        const menus = res.data;
+        this.setState({ menus });
+        console.log(menus);
+      });
+  }
   handleChange(event) {
     this.setState({
       [event.target.name]: event.target.value,
@@ -112,51 +124,47 @@ class AddMenu extends React.Component {
   handleSubmit(event) {
     event.preventDefault();
     if (this.validator.allValid()) {
-      const menu = {
-        menu: this.state.menu,
-        description: this.state.description,
-        date: Date.now(),
-      };
-      console.log(menu);
+      const formdata = new FormData();
+      formdata.append("submenu", this.state.submenu);
+      formdata.append("description", this.state.description);
+      formdata.append("description1", this.state.description1);
+      formdata.append("menu", this.state.menu);
+      formdata.append("file", this.state.image);
       axios
-        .post(`https://deepthoughts-nodejs.herokuapp.com/admin/add_menu`, menu)
-        .then((res) => {
-          console.log(res);
-          console.log(res.data);
+        .post(
+          `https://deepthoughts-nodejs.herokuapp.com/admin/add_sub_menu`,
+          formdata
+        )
+        .then(function (response) {
+          // handle success
+
+          console.log(response.data);
+
+          this.setState({ formdata });
+        })
+        .catch(function (error) {
+          // handle error
+          console.log(error);
         });
 
-      this.props.history.push("/menu");
+      this.props.history.push("/sub_menu");
     } else {
       this.validator.showMessages();
       this.forceUpdate();
     }
   }
-  menuNameChange(e) {
-    this.setState({
-      menu: e.target.value,
-    });
-    if (this.state.validError != true) {
-      axios
-        .get(`https://deepthoughts-nodejs.herokuapp.com/admin/menus`)
-        .then((res) => {
-          if (this.state.menu > 0) {
-            this.setState({
-              mobile_message: "Menu already exist",
-              validError: false,
-            });
-          } else {
-            this.setState({ mobile_message: "", validError: true });
-          }
-        });
-    }
+
+  onFileChange(e) {
+    this.setState({ image: e.target.files[0] });
   }
+
   render() {
     return (
       <div>
         <Sidebar></Sidebar>
         <div className="admin-wrapper col-12">
           <div className="admin-content">
-            <div className="admin-head">Menu - Add New</div>
+            <div className="admin-head">Sub Menu - Add New</div>
             <div className="admin-data">
               <div className="container-fluid p-0">
                 <form
@@ -167,26 +175,45 @@ class AddMenu extends React.Component {
                     <div className="col-lg-12 p-0"></div>
                     <div className="col-lg-12 p-0">
                       <div className="form-group tags-field row m-0">
-                        <label className="col-lg-2 p-0">Menu Name</label>
+                        <label className="col-lg-2 p-0">Sub Menu Name</label>
                         <input
                           className="form-control col-lg-10"
-                          name="menu"
-                          onChange={this.menuNameChange}
-                          value={this.state.menu}
+                          name="submenu"
+                          onChange={this.handleChange}
+                          value={this.state.submenu}
                           type="text"
                           onfocus="this.placeholder = 'Menu Name'"
                           onblur="this.placeholder = ''"
-                          placeholder="Alt Text"
+                          placeholder=""
                         />
                         {this.validator.message(
-                          "Menu Name",
-                          this.state.menu,
+                          "Sub Menu Name",
+                          this.state.submenu,
                           "required|whitespace|min:1|max:20"
                         )}
                         {this.state.mobile_message}
                       </div>
+
                       <div className="form-group tags-field row m-0">
-                        <label className="col-lg-2 p-0">Description</label>
+                        <label className="col-lg-2 p-0">Upload Image</label>
+                        <input
+                          type="file"
+                          onChange={this.onFileChange}
+                          name="file"
+                          className="form-control col-lg-10"
+                        />
+
+                        {this.validator.message(
+                          "Image",
+                          this.state.image,
+                          "required"
+                        )}
+                      </div>
+
+                      <div className="form-group tags-field row m-0">
+                        <label className="col-lg-2 p-0">
+                          Short Description
+                        </label>
                         <textarea
                           className="form-control col-lg-10"
                           name="description"
@@ -200,8 +227,55 @@ class AddMenu extends React.Component {
                         {this.validator.message(
                           "Description",
                           this.state.description,
-                          "required|whitespace|min:40|max:200"
+                          "required|whitespace|min:40|max:70"
                         )}
+                      </div>
+                      <div className="form-group tags-field row m-0">
+                        <label className="col-lg-2 p-0">
+                          Expand Description
+                        </label>
+                        <textarea
+                          className="form-control col-lg-10"
+                          name="description1"
+                          onChange={this.handleChange}
+                          value={this.state.description1}
+                          type="text"
+                          onfocus="this.placeholder = 'Menu Name'"
+                          onblur="this.placeholder = ''"
+                          placeholder=""
+                        />
+                        {this.validator.message(
+                          "Description",
+                          this.state.description1,
+                          "required|whitespace|min:70|max:200"
+                        )}
+                      </div>
+
+                      <div className="form-group tags-field row m-0">
+                        <label className="col-lg-2 p-0">Menu Name</label>
+
+                        <select
+                          className="form-control col-lg-10"
+                          name="menu"
+                          onChange={this.handleChange}
+                        >
+                          <option>Select Menu</option>
+                          {this.state.menus &&
+                            this.state.menus.map((data, index) => {
+                              return (
+                                <option value={data.menu} key={index}>
+                                  {data.menu}
+                                </option>
+                              );
+                            })}
+                        </select>
+
+                        {this.validator.message(
+                          "Menu Name",
+                          this.state.menu,
+                          "required"
+                        )}
+                        {this.state.mobile_message}
                       </div>
                     </div>
 
@@ -229,4 +303,4 @@ class AddMenu extends React.Component {
   }
 }
 
-export default AddMenu;
+export default AddSubMenu;

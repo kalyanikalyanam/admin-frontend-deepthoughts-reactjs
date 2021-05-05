@@ -1,12 +1,16 @@
 import axios from "axios";
 import React from "react";
 import Sidebar from "../../components/Sidebar";
-import SimpleReactValidator from "simple-react-validator";
 import Loader from "react-loader-spinner";
-class ViewMenu extends React.Component {
+import SimpleReactValidator from "simple-react-validator";
+class ViewSubMenu extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      submenu: "",
+      description: "",
+      description1: "",
+      image: "",
       menu: "",
       date: Date.now(),
       mobile_message: "",
@@ -14,8 +18,10 @@ class ViewMenu extends React.Component {
       loading: false,
     };
     this.handleChange = this.handleChange.bind(this);
+    // this.subMenuNameChange = this.subMenuNameChange.bind(this);
+    // this.onFileChange = this.onFileChange.bind(this);
+
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.menuNameChange = this.menuNameChange.bind(this);
     this.validator = new SimpleReactValidator({
       className: "text-danger",
       validators: {
@@ -106,21 +112,37 @@ class ViewMenu extends React.Component {
     const { _id } = this.props.match.params;
     console.log(_id);
     axios
-      .get(`https://deepthoughts-nodejs.herokuapp.com/admin/update_menu/${_id}`)
+      .get(
+        `https://deepthoughts-nodejs.herokuapp.com/admin/update_sub_menu/${_id}`
+      )
       .then((res) => {
         console.log(res.data);
-        const menu = {
-          menu: res.data.menu,
+        const submenu = {
+          submenu: res.data.submenu,
           description: res.data.description,
-          date: res.data.date,
+          description1: res.data.description1,
+          image: res.data.image,
+          menu: res.data.menu,
         };
-        console.log(menu.menu);
+        console.log(submenu.sub_menu);
         this.setState({
-          menu: menu.menu,
-          description: menu.description,
-          date: menu.date,
+          submenu: submenu.submenu,
+          description: submenu.description,
+          description1: submenu.description1,
+          image: submenu.image,
+          menu: submenu.menu,
           loading: true,
         });
+      });
+    this.menu();
+  }
+  menu() {
+    axios
+      .get(`https://deepthoughts-nodejs.herokuapp.com/admin/menus`)
+      .then((res) => {
+        const menus = res.data;
+        this.setState({ menus });
+        console.log(menus);
       });
   }
 
@@ -134,42 +156,30 @@ class ViewMenu extends React.Component {
     const { _id } = this.props.match.params;
     e.preventDefault();
     if (this.validator.allValid()) {
-      const menu = {
+      const submenu = {
+        submenu: this.state.submenu,
+        description: this.state.description,
+        image: this.state.image,
         menu: this.state.menu,
-        date: Date.now(),
+        image: this.state.image,
       };
       axios
         .put(
-          `https://deepthoughts-nodejs.herokuapp.com/admin/update_menu_patch/${_id}`,
-          menu
+          `https://deepthoughts-nodejs.herokuapp.com/admin/update_sub_menu_patch/${_id}`,
+          submenu
         )
         .then((res) => console.log(res.data));
 
-      this.props.history.push("/menu");
+      this.props.history.push("/sub_menu");
     } else {
       this.validator.showMessages();
       this.forceUpdate();
     }
   }
-  menuNameChange(e) {
-    this.setState({
-      menu: e.target.value,
-    });
-    if (this.state.validError != true) {
-      axios
-        .get(`https://deepthoughts-nodejs.herokuapp.com/admin/menus`)
-        .then((res) => {
-          if (this.state.menu > 1) {
-            this.setState({
-              mobile_message: "Menu already exist",
-              validError: false,
-            });
-          } else {
-            this.setState({ mobile_message: "", validError: true });
-          }
-        });
-    }
-  }
+
+  // onFileChange(e) {
+  //   this.setState({ image: e.target.files });
+  // }
 
   render() {
     return (
@@ -177,11 +187,11 @@ class ViewMenu extends React.Component {
         <Sidebar></Sidebar>
         <div className="admin-wrapper col-12">
           <div className="admin-content">
-            <div className="admin-head">Menu - View</div>
+            <div className="admin-head">Sub Menu - View</div>
             {this.state.loading ? (
               <div className="admin-data">
                 <div className="col-lg-12 p-0 text-right mb-30">
-                  <a href="/menu">
+                  <a href="/sub_menu">
                     <button className="button button-contactForm boxed-btn">
                       Back
                     </button>
@@ -192,21 +202,35 @@ class ViewMenu extends React.Component {
                     <tbody>
                       <tr>
                         <td valign="top" width="150px;">
+                          <b>Sub Menu Name</b>
+                        </td>
+                        <td>{this.state.submenu}</td>
+                      </tr>
+                      <tr>
+                        <td valign="top" width="150px;">
+                          <b>Short Description</b>
+                        </td>
+                        <td>{this.state.description}</td>
+                      </tr>
+                      <tr>
+                        <td valign="top" width="150px;">
+                          <b>Expand Description</b>
+                        </td>
+                        <td>{this.state.description1}</td>
+                      </tr>
+                      <tr>
+                        <td valign="top" width="150px;">
                           <b>Menu Name</b>
                         </td>
                         <td>{this.state.menu}</td>
                       </tr>
                       <tr>
-                        <td valign="top">
-                          <b>Updated Date</b>
-                        </td>
-                        <td>{this.state.date}</td>
-                      </tr>
-                      <tr>
                         <td valign="top" width="150px;">
-                          <b>Description</b>
+                          <b>Image</b>
                         </td>
-                        <td>{this.state.description}</td>
+                        <td>
+                          <img src={this.state.image} />
+                        </td>
                       </tr>
                     </tbody>
                   </table>
@@ -231,4 +255,4 @@ class ViewMenu extends React.Component {
   }
 }
 
-export default ViewMenu;
+export default ViewSubMenu;

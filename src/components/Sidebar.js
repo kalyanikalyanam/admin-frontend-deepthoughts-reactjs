@@ -1,13 +1,21 @@
 import React from "react";
-import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
+import { isAutheticated, signout } from "../auth";
+import { Link, Route, useParams, Redirect, useHistory } from "react-router-dom";
 
 function Sidebar() {
+  const {
+    user: { name },
+  } = isAutheticated();
+
+  console.log(name);
+
+  const history = useHistory();
   return (
     <div>
       <div className="admin">
         <div className="slidebar-left">
           <div className="admin-logo">
-            <img src="/assets/img/logo/logo.png" />
+            <img src="/assets/img/logo/deepthoughtlogo.svg" />
           </div>
           <div className="menu-content">
             <div className="gw-sidebar">
@@ -23,6 +31,151 @@ function Sidebar() {
                     <li>
                       <Link to="/menu">
                         <i className="fa fa-upload" aria-hidden="true" /> Menu
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/sub_menu">
+                        <i class="fa fa-book fa-fw" aria-hidden="true"></i> Sub
+                        Menu
+                      </Link>
+                    </li>
+                    {/* <li className="init-arrow-down"> */}
+                    <li>
+                      {" "}
+                      <a href="#">
+                        <span>
+                          <i className="fa fa-home" aria-hidden="true"></i>
+                          Home Page
+                        </span>
+                        <b className="gw-arrow" />
+                      </a>
+                      <ul className="gw-submenu" style={{ display: "block" }}>
+                        {/* <li>
+                          {" "}
+                          <a href="home_section_1" style={{ color: "white" }}>
+                            Slider
+                          </a>{" "}
+                        </li> */}
+                        <li>
+                          {" "}
+                          <a
+                            href="/home1/608b912efcc7860015dce5b1"
+                            style={{ color: "white" }}
+                          >
+                            Section 1 Text
+                          </a>{" "}
+                        </li>
+
+                        <li>
+                          {" "}
+                          <a
+                            href="/home_section_1_1"
+                            style={{ color: "white" }}
+                          >
+                            Section 1 Videos
+                          </a>{" "}
+                        </li>
+                        <li>
+                          {" "}
+                          <a href="/home_section_2" style={{ color: "white" }}>
+                            Section 2
+                          </a>{" "}
+                        </li>
+                        <li>
+                          {" "}
+                          <a href="/home_section_3" style={{ color: "white" }}>
+                            Section 3
+                          </a>{" "}
+                        </li>
+                        <li>
+                          {" "}
+                          <a href="/home_section_4" style={{ color: "white" }}>
+                            Media Presence
+                          </a>{" "}
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      {" "}
+                      <a href="#">
+                        <span>
+                          <i class="fa fa-info-circle" aria-hidden="true"></i>{" "}
+                          About Us Page
+                        </span>
+                        <b className="gw-arrow" />
+                      </a>
+                      <ul className="gw-submenu" style={{ display: "block" }}>
+                        <li>
+                          {" "}
+                          <a href="/about_section_2" style={{ color: "white" }}>
+                            Values
+                          </a>{" "}
+                        </li>
+                        <li>
+                          {" "}
+                          <a href="/about_section_3" style={{ color: "white" }}>
+                            Leadership
+                          </a>{" "}
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      {" "}
+                      <a href="#">
+                        <span>
+                          <i
+                            className="fa fa-rss-square"
+                            aria-hidden="true"
+                          ></i>{" "}
+                          Blog
+                        </span>
+                        <b className="gw-arrow" />
+                      </a>
+                      <ul className="gw-submenu" style={{ display: "block" }}>
+                        <li>
+                          {" "}
+                          <a href="/blogcategory" style={{ color: "white" }}>
+                            Category
+                          </a>{" "}
+                        </li>
+                        <li>
+                          {" "}
+                          <a href="/article" style={{ color: "white" }}>
+                            Articles
+                          </a>{" "}
+                        </li>
+                      </ul>
+                    </li>
+
+                    <li>
+                      <Link to="/post">
+                        <i className="fa fa-upload" aria-hidden="true" /> Posts
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/privatepage">
+                        <i className="fa fa-file" aria-hidden="true"></i>{" "}
+                        Private Pages
+                      </Link>
+                    </li>
+
+                    {/* <li>
+                      <Link to="/changepassword">
+                        <i class="fa fa-book fa-fw" aria-hidden="true"></i>
+                        Change Password
+                      </Link>
+                    </li> */}
+                    <li>
+                      <Link
+                        to=""
+                        onClick={() => {
+                          signout(() => {
+                            history.push("/");
+                          });
+                        }}
+                      >
+                        <i class="fa fa-sign-out" aria-hidden="true"></i>
+                        Logout {name}
                       </Link>
                     </li>
                     {/* <li className="init-arrow-down">
@@ -60,11 +213,6 @@ function Sidebar() {
                         </li>
                       </ul>
                     </li> */}
-                    <li>
-                      <Link to="/post">
-                        <i className="fa fa-upload" aria-hidden="true" /> Posts
-                      </Link>
-                    </li>
                     {/* <li class="init-un-active">  */}
                     {/* <li>
                       <Link to="/contact">

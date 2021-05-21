@@ -89,6 +89,8 @@ import AddPrivatePage from "./components/privatepages/add_privatepage";
 import EditPrivatePage from "./components/privatepages/edit_privatepage";
 import ViewPrivatePage from "./components/privatepages/view_privatepage";
 
+import SidebarSample from "./components/sidebarsample";
+
 function Routing() {
   return (
     <Router>
@@ -117,7 +119,6 @@ function Routing() {
         <Route exact path="/edit_post/:_id" component={EditPost}></Route>
         <Route exact path="/view_post/:_id" component={ViewPost}></Route>
         {/* AddHome1 */}
-
         <Route exact path="/home_section_1" component={Home1}></Route>
         <Route exact path="/add_home1" component={AddHome1}></Route>
         {/* <Route exact path="/edit_home1/:_id" component={EditHome1}></Route> */}
@@ -138,13 +139,11 @@ function Routing() {
         <Route exact path="/add_home3" component={AddHome3}></Route>
         <Route exact path="/edit_home3/:_id" component={EditHome3}></Route>
         <Route exact path="/view_home3/:_id" component={ViewHome3}></Route>
-
         {/* Home1-1 */}
         <Route exact path="/home_section_1_1" component={Home1_1}></Route>
         <Route exact path="/add_home1_1" component={AddHome1_1}></Route>
         <Route exact path="/edit_home1_1/:_id" component={EditHome1_1}></Route>
         <Route exact path="/view_home1_1/:_id" component={ViewHome1_1}></Route>
-
         {/* //Home4 */}
         <Route exact path="/home_section_4" component={Home4}></Route>
         <Route exact path="/add_home4" component={AddHome4}></Route>
@@ -162,7 +161,6 @@ function Routing() {
         <Route exact path="/view_about3/:_id" component={ViewAbout3}></Route>
         {/* Blog */}
         <Route exact path="/blog" component={Blog}></Route>
-
         <Route exact path="/blogcategory" component={BlogCategory}></Route>
         <Route
           exact
@@ -179,16 +177,12 @@ function Routing() {
           path="/view_blogcategory/:_id"
           component={ViewBlogCategory}
         ></Route>
-
         {/* Article */}
-
         <Route exact path="/article" component={Blog1}></Route>
         <Route exact path="/add_article" component={AddBlog1}></Route>
         <Route exact path="/edit_article/:_id" component={EditBlog1}></Route>
         <Route exact path="/view_article/:_id" component={ViewBlog1}></Route>
-
         {/* Private pages */}
-
         <Route exact path="/privatepage" component={PrivatePage}></Route>
         <Route exact path="/add_privatepage" component={AddPrivatePage}></Route>
         <Route
@@ -201,6 +195,7 @@ function Routing() {
           path="/view_privatepage/:_id"
           component={ViewPrivatePage}
         ></Route>
+        <Route exact path="/SidebarSample" component={SidebarSample}></Route>
       </Switch>
     </Router>
   );
